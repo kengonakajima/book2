@@ -99,4 +99,54 @@ mariadb - backendsv(node) - gmsv(node) - Internet - WebGLクライアント / Un
 
 ゲーム内容はKオンラインと同様MMORPGをベースとする。MOBがポップして、爆弾を投げて倒す。
 倒すとGoldがたまっていく、ところまで。
+KオンラインはNPCによるアイテムショップのサンプルコードが含まれていたが、
+それはWebAPIを用いた実装をするのが普通なので削除・・するかどうか、作りながらかんがえる。
 
+
+## RPCスタブジェネレータ
+VCEのジェネレータは強力だったがオーバースペックだった。
+かといってgRPCなどを使うと巨大すぎて中身を見るのが難しすぎる。
+RPCも含めて全体の中身を見れるようにしたい。
+そこで、極小のRPCスタブジェネレータを実装する。
+
+元の版では、k.xmlで以下のように定義していた。floatは使われていなかった。
+
+```	
+    <!-- キャラクターログイン -->
+    <method methname="login" prflow="c2s" >
+      <param prtype="string" prname="characterName" prlength="100" />	  	  
+    </method>
+    <!--chat チャットで発言をする -->
+    <method methname="chat" prflow="c2s" >
+      <param prtype="string" prname="text" prlength="2000" />
+    </method>
+    <!--move キャラクターを移動させることの要求 -->
+    <method methname="move" prflow="c2s" >
+      <param prtype="int" prname="toX" />
+      <param prtype="int" prname="toY" /> 	  
+    </method>
+```
+
+構造体はCharacterItemだけで使っていて、enumは何種類かあった。
+構造体とenumの出力はなくてもどうにかなる。
+文字列と整数があればよい。ので、stringと intだけを関数の引数として使えるようなJavaScriptによる変換ツールを実装する。
+
+JavaScriptで、上記を以下のようにJSONで定義できるようにする。
+
+```
+var protocolDef= {
+ login: {
+  direction: "c2s",
+  args: [ "characterName:string" ]
+ },
+ chat: {
+  direction: "c2s",
+  args: [ "text:string" ]
+ },
+ move: {
+  direction: "c2s",
+  args: [ "toX:int", "toY:int" ]
+ }
+}
+```
+このJSONオブジェクトの中身を解析して、NodeやC#用のスタブコードを生成して使う。
