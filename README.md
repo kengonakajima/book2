@@ -5,6 +5,7 @@
 vol.2(予定)では、ゲームの運用についてコンテナやマネージドサービスを使った例も紹介するが、
 ここではその運用の対象となる各タイプのゲームのコードそのものの更新をする。
 
+古いほうはここ <a href="https://github.com/kengonakajima/book">https://github.com/kengonakajima/book</a>
 
 ## 2011年の原作サンプルコードの問題
 - 最近のmacOSでビルドが通らない。
