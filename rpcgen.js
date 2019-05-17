@@ -24,7 +24,7 @@ jsSendFunc = function(funcname,def) {
     });
 
     // serialize
-    out.push(" var _ab=new ArrayBuffer(_totlen+4);");
+    out.push(" var _ab=new ArrayBuffer(_totlen+2);");
     out.push(" var _dv=new DataView(_ab);");        
     out.push(" var _ofs=0;");
     out.push(` _dv.setUint16(_ofs,${def.id},true); _ofs+=2;`);
@@ -44,10 +44,10 @@ jsSendFunc = function(funcname,def) {
 }
 jsRecvSwitch=function(defs) {
     var out=[];
-    out.push("recv_single_message = function(target,arybuf) {");
+    out.push("recv_binary_message = function(target,arybuf) {");
     out.push(" var _dv=new DataView(arybuf);");
     out.push(" var _func_id=_dv.getUint16(0,true);");
-    out.push(" var _ofs=0;");
+    out.push(" var _ofs=2;");
     out.push(" switch(_func_id) {");
     Object.keys(defs).forEach(function(funcname,i) { 
         var def=defs[funcname];
@@ -62,36 +62,16 @@ jsRecvSwitch=function(defs) {
                 out.push(`  _ofs++;`);
                 out.push(`  var ${argname}_u8a=new Uint8Array(${argname}_len);`);
                 out.push(`  for(var i=0;i<${argname}_len;i++) ${argname}_u8a[i]=_dv.getUint8(_ofs+i);`);
-                out.push(`  var ${argname}=uint8arraytostring(${argname}_u8a);`);
+                out.push(`  var ${argname}=uint8array2utf8string(${argname}_u8a);`);
                 out.push(`  _ofs+=${argname}_len;`);                
             }
         });
-        out.push(`  recv_${funcname}(${argnames.join(',')});`);
+        out.push(`  recv_${funcname}(target,${argnames.join(',')});`);
         out.push(" }; break;");
-        console.log("nnnn:",funcname);
     });
-    out.push(" default:console.log('invalid func_id:',func_id);break;");
+    out.push(" default:console.log('invalid func_id:',_func_id);break;");
     out.push(" };");
     out.push("}");
-    /*
-    MrsBuffer.prototype.parseRecord = function() {
-        if( this.used < 4 ) return false;
-        var record_len = this.dv.getUint32(0,true);
-        if( this.used <4+record_len) return false;
-        var payload_len = record_len-4-2-2;
-        var seqnum = this.dv.getUint32(4,true);
-        var options = this.dv.getUint16(4+4,true);
-        var payload_type = this.dv.getUint16(4+4+2,true);
-        var u8a=new Uint8Array(this.dv.buffer.slice(4+4+2+2,4+4+2+2+payload_len));
-        this.shift(record_len+4);
-        if(this.used>512*1024) {
-            console.log("mrs: recv buffer too much data:", this.used, "expect_record_len:",record_len);
-            this.used=0;
-        }
-        return {seqnum:seqnum, options:options,payload_type:payload_type,payload:u8a};
-    }
-    */
-    console.log("recvdefs:",defs);
     return out;
 }
 
@@ -100,8 +80,9 @@ exports.generateJS = function(dir,defs) {
     var recvdefs={};
     Object.keys(defs).forEach(function(k,i) {
         var def=defs[k];
-        if(def.dir==dir||def.dir==BOTH) {
+        if(def.dir==dir||def.dir=="BOTH") {
             out=out.concat(jsSendFunc(k,def));
+            if(def.dir=="BOTH") recvdefs[k]=def;
         } else {
             recvdefs[k]=def;
         }

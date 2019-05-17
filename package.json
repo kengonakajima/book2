@@ -1,0 +1,31 @@
+{
+  "scripts": {
+    "start": "node ./gmsv"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".git",
+      "cl.js",
+      "clutil.js",
+      "char.js",
+      "chunk.js",
+      "hud.js",
+      "effect.js",
+      "atlas.js",
+      "clfield.js",
+      "mapview.js",
+      "hud.js",
+      "assets/*",
+      "saves/*",
+      "orig_saves/*"
+    ]
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "helmet": "^3.9.0",
+    "request": "^2.85.0",
+    "ws": "^7.0.0"
+  }
+}
