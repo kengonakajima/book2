@@ -41,13 +41,32 @@ send_chat=function(target,text)
  _ofs+=u8ary_text.length;
  target.send(_ab)
 }
+send_field=function(target,width,height,ground,obj)
+{
+ var _totlen=0;
+ _totlen+=4; // width;
+ _totlen+=4; // height;
+ _totlen+=4+ground.length*4;
+ _totlen+=4+obj.length*4;
+ var _ab=new ArrayBuffer(_totlen+2);
+ var _dv=new DataView(_ab);
+ var _ofs=0;
+ _dv.setUint16(_ofs,7,true); _ofs+=2;
+ _dv.setInt32(_ofs,width|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,height|0,true); _ofs+=4;
+ _dv.setUint32(_ofs,ground.length,true); _ofs+=4;
+ for(var i=0;i<ground.length;i++) { _dv.setInt32(_ofs,ground[i],true); _ofs+=4; }
+ _dv.setUint32(_ofs,obj.length,true); _ofs+=4;
+ for(var i=0;i<obj.length;i++) { _dv.setInt32(_ofs,obj[i],true); _ofs+=4; }
+ target.send(_ab)
+}
 recv_binary_message = function(target,arybuf) {
  var _dv=new DataView(arybuf);
  var _func_id=_dv.getUint16(0,true);
  var _ofs=2;
  switch(_func_id) {
  case 1: { // ping
-  var val=_dv.getInt32(_ofs,true);
+  var val=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_ping(target,val);
  }; break;
  case 2: { // login
@@ -69,8 +88,8 @@ recv_binary_message = function(target,arybuf) {
   recv_chat(target,text);
  }; break;
  case 6: { // move
-  var to_x=_dv.getInt32(_ofs,true);
-  var to_y=_dv.getInt32(_ofs,true);
+  var to_x=_dv.getInt32(_ofs,true); _ofs+=4;
+  var to_y=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_move(target,to_x,to_y);
  }; break;
  default:console.log('invalid func_id:',_func_id);break;

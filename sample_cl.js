@@ -58,7 +58,7 @@ recv_binary_message = function(target,arybuf) {
  var _ofs=2;
  switch(_func_id) {
  case 1: { // ping
-  var val=_dv.getInt32(_ofs,true);
+  var val=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_ping(target,val);
  }; break;
  case 3: { // loginResult
@@ -68,7 +68,7 @@ recv_binary_message = function(target,arybuf) {
   for(var i=0;i<name_len;i++) name_u8a[i]=_dv.getUint8(_ofs+i);
   var name=uint8array2utf8string(name_u8a);
   _ofs+=name_len;
-  var result=_dv.getInt32(_ofs,true);
+  var result=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_loginResult(target,name,result);
  }; break;
  case 5: { // chat
@@ -79,6 +79,17 @@ recv_binary_message = function(target,arybuf) {
   var text=uint8array2utf8string(text_u8a);
   _ofs+=text_len;
   recv_chat(target,text);
+ }; break;
+ case 7: { // field
+  var width=_dv.getInt32(_ofs,true); _ofs+=4;
+  var height=_dv.getInt32(_ofs,true); _ofs+=4;
+  var ground_len=_dv.getInt32(_ofs,true); _ofs+=4;
+  var ground=new Int32Array(ground_len);
+  for(var i=0;i<ground_len;i++) { ground[i]=_dv.getInt32(_ofs,true); _ofs+=4; }
+  var obj_len=_dv.getInt32(_ofs,true); _ofs+=4;
+  var obj=new Int32Array(obj_len);
+  for(var i=0;i<obj_len;i++) { obj[i]=_dv.getInt32(_ofs,true); _ofs+=4; }
+  recv_field(target,width,height,ground,obj);
  }; break;
  default:console.log('invalid func_id:',_func_id);break;
  };

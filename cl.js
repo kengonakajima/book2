@@ -27,3 +27,6 @@ recv_ping = function(conn,val) {
 recv_loginResult = function(conn,name,result) {
     console.log("recv_loginResult:",name,result);
 }
+recv_field = function(conn,width,height,ground,obj) {
+    console.log("recv_field:",width,height,ground,obj);
+}

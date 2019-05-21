@@ -8,6 +8,7 @@ var defs= {
     loginResult: { id:3, dir:S2C, args:{name:str8,result:i32} },    
     chat: { id:5, dir:BOTH, args:{text:str8} },
     move: { id:6, dir:C2S, args:{to_x:i32, to_y:i32} },
+    field: { id:7, dir:S2C, args:{width:i32, height:i32, ground:i32ary, obj:i32ary } }
 };
 
 fs=require("fs");

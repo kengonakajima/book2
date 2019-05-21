@@ -11,30 +11,13 @@ var g_ws_port=22222;
 
 console.log("gmsv started");
 
-//var http_server = http.createServer(function(request,response) {
-//    console.log((new Date()) + ' Received HTTP request for ' + request.url);
-//    response.writeHead(404);
-//    response.end();    
-//});
 var ws_server = new WebSocket.Server({
     port: g_ws_port
-//    httpServer: http_server,
-//    autoAcceptConnections: false
 });
-
-//http_server.listen( g_ws_port, function() {
-//    console.log((new Date()) + ' HTTP server is listening on port ' + g_ws_port );    
-//});
 
 var g_agents=[];
 
 ws_server.on('connection', function(conn) {
-//    if (request.requestedProtocols.indexOf('game-protocol') === -1) {
-//        request.reject();
-//        return;
-//    }
-    //    var connection = request.accept("game-protocol", request.origin );
-    
     console.log((new Date()) + ' websocket connection accepted');
     
     var cl = new Agent(conn);
@@ -80,6 +63,7 @@ var web_server = app.listen(g_web_port, "0.0.0.0", function() {
 recv_login = function(conn,name) {
     console.log("recv_login:",name);
     send_loginResult(conn,name,1);
+    send_field(conn,g_fld.width,g_fld.height,g_fld.ground,g_fld.obj);
 }
 
 
