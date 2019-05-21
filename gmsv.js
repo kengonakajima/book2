@@ -1,6 +1,7 @@
 require("./sample_sv.js");
 require("./agent.js");
 require("./util.js");
+require("./game.js");
 
 var WebSocket=require("ws");
 var http=require("http");
@@ -80,3 +81,7 @@ recv_login = function(conn,name) {
     console.log("recv_login:",name);
     send_loginResult(conn,name,1);
 }
+
+
+g_fld=new Field();
+
