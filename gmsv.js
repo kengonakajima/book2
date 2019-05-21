@@ -48,6 +48,10 @@ app.use("/moyai", express.static("moyai"));
 app.use("/cl.js", express.static("cl.js"));
 app.use("/sample_cl.js", express.static("sample_cl.js"));
 app.use("/util.js", express.static("util.js"));
+app.use("/moyai.js", express.static("moyai.js"));
+app.use("/moyai_common.js", express.static("moyai_common.js"));
+app.use("/gl-matrix.js", express.static("gl-matrix.js"));
+app.use("/base.png", express.static("base.png"));
 
 
 app.get("/", function(req, res, next){
