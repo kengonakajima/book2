@@ -77,6 +77,7 @@ class Entity {
         this.loc=loc;
         this.id=g_id_gen++;
         this.created_at=now();
+        this.accum_time=0;
     }
 };
 
@@ -84,7 +85,13 @@ class Skeleton extends Entity {
     constructor(lc) {
         super(ENTITY_SKELETON,lc);
     }
-    poll() {
+    poll(dt) {
+        this.accum_time+=dt;
+        if(this.accum_time>10) {
+            this.to_clean=true;
+            console.log("skeleton",this.id,"timeout");
+            return;
+        }                
         console.log("skeleton poll. ",this.id);
     }
 }

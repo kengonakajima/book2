@@ -88,8 +88,11 @@ setInterval(function() {
         g_entities.push(skel);
     }
 }, 1000 );
+
+g_last_nt=0;
 setInterval(function() {
     var nt=now();
+    var dt=nt-g_last_nt;
     for(var i=0;i<g_entities.length;i++) {
         var e=g_entities[i];
         if(!e) {
@@ -97,16 +100,12 @@ setInterval(function() {
             g_entities.splice(i,1);
             continue;
         }
-        if(e.created_at < nt-10) {
-            e.to_clean=true;
-            console.log("entity",i,"timed out");
-        }        
         if(e.to_clean) {
             console.log("entity",i,"is to clean");
             g_entities.splice(i,1);
             continue;
         }
-
+        e.poll(dt);
     }
-    
+    g_last_nt=nt;
 },20);
