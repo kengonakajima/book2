@@ -8,6 +8,11 @@ GROUND_GRASS=1;
 GROUND_WATER=2;
 GROUND_BRIDGE=3;
 
+ENTITY_PC=100;
+ENTITY_SKELETON=110;
+
+
+//////////////
 
 class Field {
     constructor(width,height){
@@ -64,9 +69,27 @@ class Field {
     }
 }
 
+g_id_gen=1;
 
+class Entity {
+    constructor(t,loc) {
+        this.type=t; // ENTITY_*
+        this.loc=loc;
+        this.id=g_id_gen++;
+        this.created_at=now();
+    }
+};
 
+class Skeleton extends Entity {
+    constructor(lc) {
+        super(ENTITY_SKELETON,lc);
+    }
+    poll() {
+        console.log("skeleton poll. ",this.id);
+    }
+}
 
 if(typeof global!="undefined") {
-    global.Field=Field;    
+    global.Field=Field;
+    global.Skeleton=Skeleton;
 }

@@ -2,6 +2,8 @@ require("./sample_sv.js");
 require("./agent.js");
 require("./util.js");
 require("./game.js");
+require("./moyai_common.js");
+gl=require("./gl-matrix.js");
 
 var WebSocket=require("ws");
 var http=require("http");
@@ -75,3 +77,36 @@ recv_login = function(conn,name) {
 g_fld=new Field(32,24);
 g_fld.generate();
 
+g_entities=[];
+
+setInterval(function() {
+    var max_entities=30;
+    if(g_entities.length<max_entities) {
+        var lc=gl.vec2.fromValues(irange(0,g_fld.width), irange(0,g_fld.height));
+        var skel=new Skeleton(lc);
+        console.log("newskeleton!",skel);
+        g_entities.push(skel);
+    }
+}, 1000 );
+setInterval(function() {
+    var nt=now();
+    for(var i=0;i<g_entities.length;i++) {
+        var e=g_entities[i];
+        if(!e) {
+            console.log("entity",i,"is null, clean");
+            g_entities.splice(i,1);
+            continue;
+        }
+        if(e.created_at < nt-10) {
+            e.to_clean=true;
+            console.log("entity",i,"timed out");
+        }        
+        if(e.to_clean) {
+            console.log("entity",i,"is to clean");
+            g_entities.splice(i,1);
+            continue;
+        }
+
+    }
+    
+},20);

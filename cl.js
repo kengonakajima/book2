@@ -33,6 +33,8 @@ recv_field = function(conn,width,height,ground,obj) {
     g_fld.obj=obj;
     g_fld.ground=ground;
     setupFieldGrid();
+    g_pc=createPC(0,100);
+    
 }
 
 
@@ -74,14 +76,6 @@ g_base_deck.setTexture(g_base_atlas);
 g_base_deck.setSize(32,32,8,8);
 
 
-var colp = new Prop2D();
-colp.setColor(0.5,1,1,1);
-colp.setDeck(g_base_deck);
-colp.setIndex(1);
-colp.setScl(24,24);
-colp.setLoc(50,-20);
-g_main_layer.insertProp(colp);
-
 
 ////////////////////
 
@@ -120,6 +114,7 @@ function setupFieldGrid() {
     p.setDeck(g_base_deck);
     p.setScl(20,20);
     p.setLoc(-SCRW/2,-SCRH/2);
+    p.setIndex(-1);
     var groundgrid = new Grid(g_fld.width,g_fld.height);
     groundgrid.setDeck(g_base_deck);
     p.addGrid(groundgrid);
@@ -149,4 +144,15 @@ function setupFieldGrid() {
         return true;
     }
     g_main_layer.insertProp(p);
+}
+//////////////
+
+function createPC(x,y) {
+    var pc = new Prop2D();
+    pc.setDeck(g_base_deck);
+    pc.setIndex(0);
+    pc.setScl(20,20);
+    pc.setLoc(x,y);
+    g_main_layer.insertProp(pc);
+    return pc;
 }
