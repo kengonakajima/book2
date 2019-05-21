@@ -10,19 +10,27 @@ GROUND_BRIDGE=3;
 
 
 class Field {
-    constructor(){
-        this.width=64;
-        this.height=64;
+    constructor(width,height){
+        /*
+          index:
+          ... 
+          32,...       .......,2w-1
+          0,1,2,3,4,5,.....,w-1
+         */
+        this.width=width;
+        this.height=height;
         this.ground=new Array(this.width*this.height);
         this.obj=new Array(this.width*this.height);
+    }
+    generate() {
         for(var i=0;i<this.width*this.height;i++){
             this.ground[i]=GROUND_GRASS;
-            if(Math.random()<0.02) this.obj[i]=OBJ_TREE; else this.obj[i]=OBJ_NONE;
             var y=Math.floor(i/this.width), x=i%this.width;
-            if((x+y*2==60 || x+y*2==61) ) {
+            if((x+y==28 || x+y==27) ) {
                 if(this.ground[i]!=GROUND_WATER) this.ground[i]=GROUND_WATER;
                 if(y==10) this.ground[i]=GROUND_BRIDGE;
             }
+            if(Math.random()<0.02 && this.ground[i]!=GROUND_WATER) this.obj[i]=OBJ_TREE; else this.obj[i]=OBJ_NONE;
         }
         console.log(this.dumpField());
     }
@@ -52,12 +60,13 @@ class Field {
             }
             out.push(s);
         }
-        return out.join("\n");
+        return out.reverse().join("\n");
     }
 }
 
 
 
 
-
-global.Field=Field;
+if(typeof global!="undefined") {
+    global.Field=Field;    
+}

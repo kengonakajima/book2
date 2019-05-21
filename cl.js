@@ -29,12 +29,16 @@ recv_loginResult = function(conn,name,result) {
 }
 recv_field = function(conn,width,height,ground,obj) {
     console.log("recv_field:",width,height,ground,obj);
+    g_fld=new Field(width,height);
+    g_fld.obj=obj;
+    g_fld.ground=ground;
+    setupFieldGrid();
 }
 
 
 
 
-/////////// 
+////////////////////////////
 
 var SCRW=640, SCRH=480;
 Moyai.init(SCRW,SCRH);
@@ -78,35 +82,6 @@ colp.setScl(24,24);
 colp.setLoc(50,-20);
 g_main_layer.insertProp(colp);
 
-var gridp = new Prop2D();
-gridp.setDeck(g_base_deck);
-gridp.setScl(24,24);
-gridp.setLoc(-100,-300);
-var g = new Grid(8,8);
-g.setDeck(g_base_deck);
-var iii=1;
-for(var x=0;x<8;x++){
-    for(var y=0;y<8;y++){
-        if(y==6||x==6) continue;
-        g.set(x,y,iii % 3);
-        g.setColor( x,y, Color.fromValues(range(0.5,1), range(0.5,1), range(0.5,1), range(0.2,1) ));
-        if(x==0) g.setXFlip(x,y,true);
-        if(x==1) g.setYFlip(x,y,true);
-        if(x==2) g.setUVRot(x,y,true);
-        if(x==3) {
-            var ofs = vec2.fromValues(0.5,0.5);
-            g.setTexOffset(x,y,ofs);
-        }
-        iii++;
-    }
-}
-g.setUVRot(7,7,true);
-gridp.addGrid(g);
-gridp.prop2DPoll = function(dt) {
-    this.grids[0].set(Math.floor(Math.random()*7),Math.floor(Math.random()*7), this.poll_count%4);
-    return true;
-}
-g_main_layer.insertProp(gridp);
 
 ////////////////////
 
@@ -137,3 +112,41 @@ function animate() {
 }
 
 animate();
+
+///////////
+
+function setupFieldGrid() {
+    var p = new Prop2D();
+    p.setDeck(g_base_deck);
+    p.setScl(20,20);
+    p.setLoc(-SCRW/2,-SCRH/2);
+    var groundgrid = new Grid(g_fld.width,g_fld.height);
+    groundgrid.setDeck(g_base_deck);
+    p.addGrid(groundgrid);
+    var objgrid = new Grid(g_fld.width,g_fld.height);
+    objgrid.setDeck(g_base_deck);
+    p.addGrid(objgrid);
+    for(var x=0;x<g_fld.width;x++){
+        for(var y=0;y<g_fld.height;y++){
+            var cell=g_fld.getCell(x,y);
+            var gr_ind=-1, obj_ind=-1;
+            switch(cell.ground) {
+            case GROUND_GRASS: gr_ind=3; break;
+            case GROUND_WATER: gr_ind=4; break;
+            case GROUND_BRIDGE: gr_ind=5; break;
+            }
+            switch(cell.obj) {
+            case OBJ_TREE: obj_ind=2; break;
+                
+            }
+            groundgrid.set(x,y,gr_ind);
+            objgrid.set(x,y,obj_ind);
+            
+//            console.log("cell:",x,y,cell);
+        }
+    }
+    p.prop2DPoll = function(dt) {
+        return true;
+    }
+    g_main_layer.insertProp(p);
+}

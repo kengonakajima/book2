@@ -52,6 +52,7 @@ app.use("/moyai.js", express.static("moyai.js"));
 app.use("/moyai_common.js", express.static("moyai_common.js"));
 app.use("/gl-matrix.js", express.static("gl-matrix.js"));
 app.use("/base.png", express.static("base.png"));
+app.use("/game.js", express.static("game.js"));
 
 
 app.get("/", function(req, res, next){
@@ -71,5 +72,6 @@ recv_login = function(conn,name) {
 }
 
 
-g_fld=new Field();
+g_fld=new Field(32,24);
+g_fld.generate();
 
