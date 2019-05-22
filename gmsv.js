@@ -87,6 +87,9 @@ sendEntity = function(conn,e) {
 broadcastEntity = function(e) {
     for(var i=0;i<g_conns.length;i++) sendEntity( g_conns[i],e);
 }
+broadcastEntityDelete = function(e) {
+    for(var i=0;i<g_conns.length;i++) send_entityDelete( g_conns[i], e.id);    
+}
 sendAllEntities = function(conn) {
     for(var i=0;i<g_entities.length;i++) sendEntity(conn,g_entities[i]);
 }

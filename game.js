@@ -87,6 +87,9 @@ class Entity {
             var ne=findEntityByLoc(nx,ny);
             if( ne ) {
                 console.log("checkentity hit at",nx,ny);
+                if(this.onHitEntity) {
+                    this.onHitEntity(ne);
+                }
                 return false;
             }
             var nc=g_fld.getCell(nx,ny);
@@ -97,10 +100,8 @@ class Entity {
             if( (nc.ground==GROUND_GRASS||nc.ground==GROUND_BRIDGE) && nc.obj==OBJ_NONE) {
                 this.loc[0]=nx;
                 this.loc[1]=ny;
-                console.log("pc moved:",nx,ny,"id:",this.id);
                 return true;
             } else {
-                console.log("pc cant move:",nx,ny,"id:",this.id);
                 return false;
             }
         } else {
@@ -118,9 +119,8 @@ class Skeleton extends Entity {
     poll(dt) {
         this.poll_cnt++;
         this.accum_time+=dt;
-        if(this.accum_time>10) {
+        if(this.accum_time>100) {
             this.to_clean=true;
-//            console.log("skeleton",this.id,"timeout");
             return;
         }
 
@@ -140,6 +140,11 @@ class PC extends Entity {
     poll(dt) {
         this.poll_cnt++;
         if(this.poll_cnt%100==0) console.log("pc poll.",this.id);
+    }
+    onHitEntity(e) {
+        if(e.type==ENTITY_SKELETON) {
+            e.to_clean=true;
+        }
     }
 
 };
@@ -200,6 +205,7 @@ gameUpdate = function() {
         }
         if(e.to_clean) {
             console.log("entity",i,"is to clean");
+            broadcastEntityDelete(e);
             g_entities.splice(i,1);
             continue;
         }

@@ -44,7 +44,10 @@ recv_entity = function(conn,id,type,x,y) {
         e.setFldLoc(x,y);
     }
 }
-
+recv_entityDelete = function(conn,id) {
+    var e=findEntity(id);
+    e.to_clean=true;
+}
 
 
 

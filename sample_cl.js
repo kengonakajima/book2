@@ -112,6 +112,10 @@ recv_binary_message = function(target,arybuf) {
   var y=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_entity(target,id,type,x,y);
  }; break;
+ case 10: { // entityDelete
+  var id=_dv.getInt32(_ofs,true); _ofs+=4;
+  recv_entityDelete(target,id);
+ }; break;
  default:console.log('invalid func_id:',_func_id);break;
  };
 }

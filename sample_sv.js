@@ -79,6 +79,17 @@ send_entity=function(target,id,type,x,y)
  _dv.setInt32(_ofs,y|0,true); _ofs+=4;
  target.send(_ab)
 }
+send_entityDelete=function(target,id)
+{
+ var _totlen=0;
+ _totlen+=4; // id;
+ var _ab=new ArrayBuffer(_totlen+2);
+ var _dv=new DataView(_ab);
+ var _ofs=0;
+ _dv.setUint16(_ofs,10,true); _ofs+=2;
+ _dv.setInt32(_ofs,id|0,true); _ofs+=4;
+ target.send(_ab)
+}
 recv_binary_message = function(target,arybuf) {
  var _dv=new DataView(arybuf);
  var _func_id=_dv.getUint16(0,true);
