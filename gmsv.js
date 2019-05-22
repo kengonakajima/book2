@@ -99,17 +99,19 @@ recv_login = function(conn,name) {
 
     conn.pc=new PC(gl.vec2.fromValues(5,5),name);
     g_entities.push(conn.pc);
+
     
     send_loginResult(conn,name,1,conn.pc.id);
     send_field(conn,g_fld.width,g_fld.height,g_fld.ground,g_fld.obj);
 
     sendAllEntities(conn);
+    broadcastEntity(conn.pc);    
 }
 recv_tryMove = function(conn,dx,dy) {
     console.log("trymove:",dx,dy);
     if(!conn.pc)return;
     if(conn.pc.tryMove(dx,dy)) {
-        sendEntity(conn,conn.pc);        
+        broadcastEntity(conn.pc);        
     }
 }
 
