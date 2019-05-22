@@ -40,7 +40,8 @@ class Field {
         console.log(this.dumpField());
     }
     getCell(x,y) {
-        var ind=x+y*this.width;
+        if(x<0||y<0||x>=this.width||y>=this.height) return null;
+        var ind=x+y*this.width;        
         return { ground: this.ground[ind], obj: this.obj[ind] };
     }
     dumpField() {
@@ -78,25 +79,140 @@ class Entity {
         this.id=g_id_gen++;
         this.created_at=now();
         this.accum_time=0;
+        this.poll_cnt=0;
     }
+    tryMove(dx,dy) {
+        if((dx==0&&dy==1) ||(dx==0&&dy==-1) || (dx==1&&dy==0) || (dx==-1&&dy==0) ) {
+            var nx=this.loc[0]+dx, ny=this.loc[1]+dy;
+            var ne=findEntityByLoc(nx,ny);
+            if( ne ) {
+                console.log("checkentity hit at",nx,ny);
+                return false;
+            }
+            var nc=g_fld.getCell(nx,ny);
+            if(!nc) {
+                console.log("cant get out of the field");
+                return false;
+            }
+            if( (nc.ground==GROUND_GRASS||nc.ground==GROUND_BRIDGE) && nc.obj==OBJ_NONE) {
+                this.loc[0]=nx;
+                this.loc[1]=ny;
+                console.log("pc moved:",nx,ny,"id:",this.id);
+                return true;
+            } else {
+                console.log("pc cant move:",nx,ny,"id:",this.id);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }    
 };
+
 
 class Skeleton extends Entity {
     constructor(lc) {
         super(ENTITY_SKELETON,lc);
+        this.move_mod=irange(50,150);
     }
     poll(dt) {
+        this.poll_cnt++;
         this.accum_time+=dt;
         if(this.accum_time>10) {
             this.to_clean=true;
-            console.log("skeleton",this.id,"timeout");
+//            console.log("skeleton",this.id,"timeout");
             return;
-        }                
-        console.log("skeleton poll. ",this.id);
+        }
+
+        if(this.poll_cnt%this.move_mod==0) {
+            var dx=irange(-1,2), dy=irange(-1,2);
+            if(this.tryMove(dx,dy)) {
+                broadcastEntity(this);
+            }
+        }
+    }
+};
+class PC extends Entity {
+    constructor(lc,name) {
+        super(ENTITY_PC,lc);
+        this.name=name;
+    }
+    poll(dt) {
+        this.poll_cnt++;
+        if(this.poll_cnt%100==0) console.log("pc poll.",this.id);
+    }
+
+};
+///////////////
+
+
+gameInit = function() {
+    g_fld=new Field(32,24);
+    g_fld.generate();
+
+    g_entities=[];
+}
+
+deleteEntity = function(e) {
+    var ind=g_entities.indexOf(e) ;
+    if(ind>=0) {
+        console.log("deleteEntity:",ind,e);
+        g_entities.splice(ind,1);
+        return true;
+    }
+    return false;
+}
+findEntityByLoc = function(x,y) {
+    for(var i=0;i<g_entities.length;i++) {
+        var e=g_entities[i];
+        if(e.loc[0]==x && e.loc[1]==y){
+            return e;
+        }
+    }
+    return null;
+}
+
+function tryPopEnemy() {
+    var max_entities=30;
+    if(g_entities.length<max_entities) {
+        var lc=gl.vec2.fromValues(irange(0,g_fld.width), irange(0,g_fld.height));
+        var skel=new Skeleton(lc);
+//        console.log("newskeleton!",skel.id);
+        g_entities.push(skel);
     }
 }
+
+g_last_nt=0;
+g_update_cnt=0;
+gameUpdate = function() {
+    g_update_cnt++;
+    if((g_update_cnt%50)==0) {
+        tryPopEnemy();
+    }
+    var nt=now();
+    var dt=nt-g_last_nt;
+    for(var i=0;i<g_entities.length;i++) {
+        var e=g_entities[i];
+        if(!e) {
+            console.log("entity",i,"is null, clean");
+            g_entities.splice(i,1);
+            continue;
+        }
+        if(e.to_clean) {
+            console.log("entity",i,"is to clean");
+            g_entities.splice(i,1);
+            continue;
+        }
+        e.poll(dt);
+    }
+    g_last_nt=nt;
+}
+
+
+
 
 if(typeof global!="undefined") {
     global.Field=Field;
     global.Skeleton=Skeleton;
+    global.PC=PC;    
 }

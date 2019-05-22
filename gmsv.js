@@ -1,5 +1,4 @@
 require("./sample_sv.js");
-require("./agent.js");
 require("./util.js");
 require("./game.js");
 require("./moyai_common.js");
@@ -17,19 +16,25 @@ var ws_server = new WebSocket.Server({
     port: g_ws_port
 });
 
-var g_agents=[];
+var g_conns=[];
 
 ws_server.on('connection', function(conn) {
+    g_conns.push(conn);
     console.log((new Date()) + ' websocket connection accepted');
     
-    var cl = new Agent(conn);
-    g_agents.push(cl);
-    conn.cl=cl;
     conn.on("message", function(message) {
-        console.log("message:",message);
         var ab=nodeBufferToArrayBuffer(message);
-        console.log("binary message:",ab );
         recv_binary_message(conn,ab);
+    });
+    conn.on("close", function(e) {
+        console.log("close:",conn.pc);
+        if(conn.pc) {
+            console.log("KKKK",            g_entities.indexOf(conn.pc) );
+            deleteEntity(conn.pc);
+            conn.pc=null;
+        }
+        var conn_ind=g_conns.indexOf(conn);
+        if(conn_ind>=0) g_conns.splice(conn_ind,1);
     });
     send_ping(conn,256);
 });
@@ -67,45 +72,42 @@ var web_server = app.listen(g_web_port, "0.0.0.0", function() {
     console.log("web server is listening on port:",web_server.address().port);
 });
 
+//////////
+
+
+
+setInterval( gameUpdate,20 );
+gameInit();
+
+
+//////////////
+sendEntity = function(conn,e) {
+    send_entity(conn,e.id,e.type,e.loc[0],e.loc[1]);
+}
+broadcastEntity = function(e) {
+    for(var i=0;i<g_conns.length;i++) sendEntity( g_conns[i],e);
+}
+sendAllEntities = function(conn) {
+    for(var i=0;i<g_entities.length;i++) sendEntity(conn,g_entities[i]);
+}
+
 recv_login = function(conn,name) {
     console.log("recv_login:",name);
-    send_loginResult(conn,name,1);
+
+    conn.pc=new PC(gl.vec2.fromValues(5,5),name);
+    g_entities.push(conn.pc);
+    
+    send_loginResult(conn,name,1,conn.pc.id);
     send_field(conn,g_fld.width,g_fld.height,g_fld.ground,g_fld.obj);
+
+    sendAllEntities(conn);
+}
+recv_tryMove = function(conn,dx,dy) {
+    console.log("trymove:",dx,dy);
+    if(!conn.pc)return;
+    if(conn.pc.tryMove(dx,dy)) {
+        sendEntity(conn,conn.pc);        
+    }
 }
 
 
-g_fld=new Field(32,24);
-g_fld.generate();
-
-g_entities=[];
-
-setInterval(function() {
-    var max_entities=30;
-    if(g_entities.length<max_entities) {
-        var lc=gl.vec2.fromValues(irange(0,g_fld.width), irange(0,g_fld.height));
-        var skel=new Skeleton(lc);
-        console.log("newskeleton!",skel);
-        g_entities.push(skel);
-    }
-}, 1000 );
-
-g_last_nt=0;
-setInterval(function() {
-    var nt=now();
-    var dt=nt-g_last_nt;
-    for(var i=0;i<g_entities.length;i++) {
-        var e=g_entities[i];
-        if(!e) {
-            console.log("entity",i,"is null, clean");
-            g_entities.splice(i,1);
-            continue;
-        }
-        if(e.to_clean) {
-            console.log("entity",i,"is to clean");
-            g_entities.splice(i,1);
-            continue;
-        }
-        e.poll(dt);
-    }
-    g_last_nt=nt;
-},20);

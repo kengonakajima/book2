@@ -52,6 +52,19 @@ send_move=function(target,to_x,to_y)
  _dv.setInt32(_ofs,to_y|0,true); _ofs+=4;
  target.send(_ab)
 }
+send_tryMove=function(target,dx,dy)
+{
+ var _totlen=0;
+ _totlen+=4; // dx;
+ _totlen+=4; // dy;
+ var _ab=new ArrayBuffer(_totlen+2);
+ var _dv=new DataView(_ab);
+ var _ofs=0;
+ _dv.setUint16(_ofs,9,true); _ofs+=2;
+ _dv.setInt32(_ofs,dx|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,dy|0,true); _ofs+=4;
+ target.send(_ab)
+}
 recv_binary_message = function(target,arybuf) {
  var _dv=new DataView(arybuf);
  var _func_id=_dv.getUint16(0,true);
@@ -69,7 +82,8 @@ recv_binary_message = function(target,arybuf) {
   var name=uint8array2utf8string(name_u8a);
   _ofs+=name_len;
   var result=_dv.getInt32(_ofs,true); _ofs+=4;
-  recv_loginResult(target,name,result);
+  var pc_entity_id=_dv.getInt32(_ofs,true); _ofs+=4;
+  recv_loginResult(target,name,result,pc_entity_id);
  }; break;
  case 5: { // chat
   var text_len=_dv.getInt8(_ofs);
@@ -90,6 +104,13 @@ recv_binary_message = function(target,arybuf) {
   var obj=new Int32Array(obj_len);
   for(var i=0;i<obj_len;i++) { obj[i]=_dv.getInt32(_ofs,true); _ofs+=4; }
   recv_field(target,width,height,ground,obj);
+ }; break;
+ case 8: { // entity
+  var id=_dv.getInt32(_ofs,true); _ofs+=4;
+  var type=_dv.getInt32(_ofs,true); _ofs+=4;
+  var x=_dv.getInt32(_ofs,true); _ofs+=4;
+  var y=_dv.getInt32(_ofs,true); _ofs+=4;
+  recv_entity(target,id,type,x,y);
  }; break;
  default:console.log('invalid func_id:',_func_id);break;
  };

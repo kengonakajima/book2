@@ -16,7 +16,7 @@ g_ws.onerror = function(error) {
     console.log("ws Error",error);
 };
 g_ws.onmessage = function (ev) {
-    console.log("ev.data:",ev.data,ev);
+//    console.log("ev.data:",ev.data,ev);
     recv_binary_message(g_ws,ev.data);
 };
 
@@ -24,8 +24,9 @@ recv_ping = function(conn,val) {
     console.log("recv_ping:",val);
     send_login(conn,"testuser");
 }
-recv_loginResult = function(conn,name,result) {
-    console.log("recv_loginResult:",name,result);
+recv_loginResult = function(conn,name,result,pc_entity_id) {
+    console.log("recv_loginResult:",name,result,pc_entity_id);
+    g_pc_entity_id=pc_entity_id;
 }
 recv_field = function(conn,width,height,ground,obj) {
     console.log("recv_field:",width,height,ground,obj);
@@ -33,8 +34,15 @@ recv_field = function(conn,width,height,ground,obj) {
     g_fld.obj=obj;
     g_fld.ground=ground;
     setupFieldGrid();
-    g_pc=createPC(0,100);
-    
+}
+recv_entity = function(conn,id,type,x,y) {
+    console.log("recv_entity:",id,type,x,y);
+    var e=findEntity(id);
+    if(!e) {
+        createEntity(id,type,x,y);
+    } else {
+        e.setFldLoc(x,y);
+    }
 }
 
 
@@ -48,7 +56,8 @@ var screen = document.getElementById("screen");
 var canvas=Moyai.getDomElement();
 screen.appendChild(canvas);
 
-
+var g_keyboard = new Keyboard();
+g_keyboard.setupBrowser(window,screen);
 var g_mouse = new Mouse();
 g_mouse.setupBrowser(window,screen);
 var g_touch = new Touch();
@@ -87,7 +96,38 @@ function animate() {
     anim_cnt++;
 	requestAnimationFrame( animate );
 
-
+    if(g_keyboard.getToggled("ArrowRight")) {
+        g_keyboard.clearToggled("ArrowRight");
+        send_tryMove(g_ws,1,0);
+    }
+    if(g_keyboard.getToggled("ArrowLeft")) {
+        g_keyboard.clearToggled("ArrowLeft");
+        send_tryMove(g_ws,-1,0);
+    }
+    if(g_keyboard.getToggled("ArrowUp")) {
+        g_keyboard.clearToggled("ArrowUp");
+        send_tryMove(g_ws,0,1);
+    }
+    if(g_keyboard.getToggled("ArrowDown")) {
+        g_keyboard.clearToggled("ArrowDown");
+        send_tryMove(g_ws,0,-1);
+    }
+    if(g_keyboard.getToggled("a")) {
+        g_keyboard.clearToggled("a");
+        send_tryMove(g_ws,-1,0);
+    }
+    if(g_keyboard.getToggled("s")) {
+        g_keyboard.clearToggled("s");
+        send_tryMove(g_ws,0,-1);
+    }
+    if(g_keyboard.getToggled("d")) {
+        g_keyboard.clearToggled("d");
+        send_tryMove(g_ws,1,0);
+    }
+    if(g_keyboard.getToggled("w")) {
+        g_keyboard.clearToggled("w");
+        send_tryMove(g_ws,0,1);
+    }    
     if(g_mouse.getButton(0)) {
         var x=g_mouse.cursor_pos[0]-SCRW/2;
         var y=SCRH/2-g_mouse.cursor_pos[1];
@@ -146,13 +186,35 @@ function setupFieldGrid() {
     g_main_layer.insertProp(p);
 }
 //////////////
-
-function createPC(x,y) {
-    var pc = new Prop2D();
-    pc.setDeck(g_base_deck);
-    pc.setIndex(0);
-    pc.setScl(20,20);
-    pc.setLoc(x,y);
-    g_main_layer.insertProp(pc);
-    return pc;
+function findEntity(eid) {
+    for(var i=0;i<g_main_layer.props.length;i++) {
+        var p=g_main_layer.props[i];
+        if(p.entity_id==eid) return p;
+    }
+    return null;
 }
+function createEntity(id,type,fld_x,fld_y) {
+    var p = new Prop2D();
+    p.setDeck(g_base_deck);
+    var ind=96;
+    if(type==ENTITY_PC) ind=0;
+    else if(type==ENTITY_SKELETON) ind=64;
+    p.setIndex(ind);
+    p.setScl(20,20);
+    p.setFldLoc = function(fx,fy) {
+        p.setLoc(-SCRW/2+10+fx*20,-SCRH/2+10+fy*20);        
+    };
+    p.setFldLoc(fld_x,fld_y);
+    p.entity_id=id;
+    p.entity_type=type;
+    p.fld_x=fld_x;
+    p.fld_y=fld_y;
+    g_main_layer.insertProp(p);
+    return p;
+}
+
+
+
+
+
+//////////
