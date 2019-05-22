@@ -82,7 +82,7 @@ gameInit();
 
 //////////////
 sendEntity = function(conn,e) {
-    send_entity(conn,e.id,e.type,e.loc[0],e.loc[1]);
+    send_entity(conn,e.id,e.type,e.loc[0],e.loc[1],e.state);
 }
 broadcastEntity = function(e) {
     for(var i=0;i<g_conns.length;i++) sendEntity( g_conns[i],e);

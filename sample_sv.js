@@ -62,13 +62,14 @@ send_field=function(target,width,height,ground,obj)
  for(var i=0;i<obj.length;i++) { _dv.setInt32(_ofs,obj[i],true); _ofs+=4; }
  target.send(_ab)
 }
-send_entity=function(target,id,type,x,y)
+send_entity=function(target,id,type,x,y,state)
 {
  var _totlen=0;
  _totlen+=4; // id;
  _totlen+=4; // type;
  _totlen+=4; // x;
  _totlen+=4; // y;
+ _totlen+=4; // state;
  var _ab=new ArrayBuffer(_totlen+2);
  var _dv=new DataView(_ab);
  var _ofs=0;
@@ -77,6 +78,7 @@ send_entity=function(target,id,type,x,y)
  _dv.setInt32(_ofs,type|0,true); _ofs+=4;
  _dv.setInt32(_ofs,x|0,true); _ofs+=4;
  _dv.setInt32(_ofs,y|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,state|0,true); _ofs+=4;
  target.send(_ab)
 }
 send_entityDelete=function(target,id)

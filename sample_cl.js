@@ -110,7 +110,8 @@ recv_binary_message = function(target,arybuf) {
   var type=_dv.getInt32(_ofs,true); _ofs+=4;
   var x=_dv.getInt32(_ofs,true); _ofs+=4;
   var y=_dv.getInt32(_ofs,true); _ofs+=4;
-  recv_entity(target,id,type,x,y);
+  var state=_dv.getInt32(_ofs,true); _ofs+=4;
+  recv_entity(target,id,type,x,y,state);
  }; break;
  case 10: { // entityDelete
   var id=_dv.getInt32(_ofs,true); _ofs+=4;

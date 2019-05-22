@@ -9,7 +9,7 @@ var defs= {
     chat: { id:5, dir:BOTH, args:{text:str8} },
     move: { id:6, dir:C2S, args:{to_x:i32, to_y:i32} },
     field: { id:7, dir:S2C, args:{width:i32, height:i32, ground:i32ary, obj:i32ary } },
-    entity: { id:8, dir:S2C, args: {id:i32, type:i32, x:i32, y:i32} },
+    entity: { id:8, dir:S2C, args: {id:i32, type:i32, x:i32, y:i32, state:i32} },
     tryMove: { id:9, dir:C2S, args: { dx:i32, dy:i32} },
     entityDelete: { id:10, dir:S2C, args: {id:i32}}
 };

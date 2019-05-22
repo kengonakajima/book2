@@ -11,6 +11,8 @@ GROUND_BRIDGE=3;
 ENTITY_PC=100;
 ENTITY_SKELETON=110;
 
+ENTITY_STATE_STANDING=1;
+ENTITY_STATE_DIED=2;
 
 //////////////
 
@@ -80,6 +82,7 @@ class Entity {
         this.created_at=now();
         this.accum_time=0;
         this.poll_cnt=0;
+        this.state=ENTITY_STATE_STANDING;        
     }
     tryMove(dx,dy) {
         if((dx==0&&dy==1) ||(dx==0&&dy==-1) || (dx==1&&dy==0) || (dx==-1&&dy==0) ) {
@@ -126,8 +129,10 @@ class Skeleton extends Entity {
 
         if(this.poll_cnt%this.move_mod==0) {
             var dx=irange(-1,2), dy=irange(-1,2);
-            if(this.tryMove(dx,dy)) {
-                broadcastEntity(this);
+            if(this.state==ENTITY_STATE_STANDING) {
+                if(this.tryMove(dx,dy)) {
+                    broadcastEntity(this);
+                }
             }
         }
     }
@@ -143,7 +148,8 @@ class PC extends Entity {
     }
     onHitEntity(e) {
         if(e.type==ENTITY_SKELETON) {
-            e.to_clean=true;
+            e.state= ENTITY_STATE_DIED;
+            broadcastEntity(e);
         }
     }
 
@@ -178,12 +184,21 @@ findEntityByLoc = function(x,y) {
 }
 
 function tryPopEnemy() {
-    var max_entities=30;
-    if(g_entities.length<max_entities) {
+    var cnt=0;
+    for(var i=0;i<g_entities.length;i++) {
+        var e=g_entities[i];
+        if( e.type==ENTITY_SKELETON) cnt++;
+    }
+    if(cnt<10) {
         var lc=gl.vec2.fromValues(irange(0,g_fld.width), irange(0,g_fld.height));
-        var skel=new Skeleton(lc);
-//        console.log("newskeleton!",skel.id);
-        g_entities.push(skel);
+        for(var i=0;i<g_entities.length;i++) {
+            var e=g_entities[i];
+            var dl=gl.vec2.fromValues(lc[0]-e.loc[0],lc[1]-e.loc[1]);
+            if( e.type==ENTITY_PC && gl.vec2.length(dl) > 7 ) {
+                var skel=new Skeleton(lc);
+                g_entities.push(skel);
+            }
+        }
     }
 }
 

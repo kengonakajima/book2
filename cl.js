@@ -35,13 +35,18 @@ recv_field = function(conn,width,height,ground,obj) {
     g_fld.ground=ground;
     setupFieldGrid();
 }
-recv_entity = function(conn,id,type,x,y) {
-    console.log("recv_entity:",id,type,x,y);
+recv_entity = function(conn,id,type,x,y,state) {
+    console.log("recv_entity:",id,type,x,y,state);
     var e=findEntity(id);
     if(!e) {
-        createEntity(id,type,x,y);
+        e=createEntity(id,type,x,y);
     } else {
         e.setFldLoc(x,y);
+    }
+    if(state==ENTITY_STATE_STANDING) {
+        e.setUVRot(false);
+    } else {
+        e.setUVRot(true);
     }
 }
 recv_entityDelete = function(conn,id) {
