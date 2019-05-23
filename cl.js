@@ -22,11 +22,13 @@ g_ws.onmessage = function (ev) {
 
 recv_ping = function(conn,val) {
     console.log("recv_ping:",val);
-    send_login(conn,"testuser");
+//    send_login(conn,"testuser");
 }
 recv_loginResult = function(conn,name,result,pc_entity_id) {
     console.log("recv_loginResult:",name,result,pc_entity_id);
     g_pc_entity_id=pc_entity_id;
+    appendLog(`login name: ${name} result: ${result}`);
+    document.getElementById("inputname").innerHTML="";
 }
 recv_field = function(conn,width,height,ground,obj) {
     console.log("recv_field:",width,height,ground,obj);
@@ -53,7 +55,9 @@ recv_entityDelete = function(conn,id) {
     var e=findEntity(id);
     e.to_clean=true;
 }
-
+recv_log = function(conn,msg) {
+    appendLog(msg);
+}
 
 
 ////////////////////////////
@@ -221,8 +225,13 @@ function createEntity(id,type,fld_x,fld_y) {
     return p;
 }
 
-
-
-
-
 //////////
+
+function loginPressed() {
+    var input=document.getElementById("loginname");
+    send_login(g_ws, input.value);
+}
+function appendLog(msg) {
+    var log=document.getElementById("log");
+    log.innerText+=msg+"\n";
+}

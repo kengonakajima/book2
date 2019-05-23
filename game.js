@@ -147,7 +147,8 @@ class PC extends Entity {
         if(this.poll_cnt%100==0) console.log("pc poll.",this.id);
     }
     onHitEntity(e) {
-        if(e.type==ENTITY_SKELETON) {
+        if(e.type==ENTITY_SKELETON && e.state == ENTITY_STATE_STANDING) {
+            broadcastLog(`${this.name} killed a skeleton!`);
             e.state= ENTITY_STATE_DIED;
             broadcastEntity(e);
         }

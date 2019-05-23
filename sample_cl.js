@@ -117,6 +117,15 @@ recv_binary_message = function(target,arybuf) {
   var id=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_entityDelete(target,id);
  }; break;
+ case 11: { // log
+  var text_len=_dv.getInt8(_ofs);
+  _ofs++;
+  var text_u8a=new Uint8Array(text_len);
+  for(var i=0;i<text_len;i++) text_u8a[i]=_dv.getUint8(_ofs+i);
+  var text=uint8array2utf8string(text_u8a);
+  _ofs+=text_len;
+  recv_log(target,text);
+ }; break;
  default:console.log('invalid func_id:',_func_id);break;
  };
 }

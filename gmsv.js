@@ -6,6 +6,15 @@ gl=require("./gl-matrix.js");
 
 var WebSocket=require("ws");
 var http=require("http");
+var mysql=require("mysql");
+var os=require("os");
+
+var my_socketpath=null;
+if(os.platform()=="linux") my_socketpath="/var/lib/mysql/mysql.sock";
+
+
+
+/////
 
 var g_web_port=3000;
 var g_ws_port=22222;
@@ -85,10 +94,19 @@ sendEntity = function(conn,e) {
     send_entity(conn,e.id,e.type,e.loc[0],e.loc[1],e.state);
 }
 broadcastEntity = function(e) {
-    for(var i=0;i<g_conns.length;i++) sendEntity( g_conns[i],e);
+    for(var i=0;i<g_conns.length;i++) {
+        if(g_conns[i].pc) sendEntity( g_conns[i],e);
+    }
 }
 broadcastEntityDelete = function(e) {
-    for(var i=0;i<g_conns.length;i++) send_entityDelete( g_conns[i], e.id);    
+    for(var i=0;i<g_conns.length;i++) {
+        if(g_conns[i].pc) send_entityDelete( g_conns[i], e.id);
+    }
+}
+broadcastLog= function(msg) {
+    for(var i=0;i<g_conns.length;i++) {
+        if(g_conns[i].pc) send_log( g_conns[i],msg);
+    }
 }
 sendAllEntities = function(conn) {
     for(var i=0;i<g_entities.length;i++) sendEntity(conn,g_entities[i]);
