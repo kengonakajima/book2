@@ -44,3 +44,47 @@ grant all privileges on mmosample.* to 'mmosample'@'localhost';
 8. プレイ開始
 
 
+## システム構成
+
+```
+MySQL - gmsv(gmsv.js) - cl(index.html,cl.js)
+```
+
+## ソース
+
+```
+mmodef.js : RPC定義ファイル
+mmo_cl.js : クライアント用RPCスタブ
+mmo_sv.js : サーバー用RPCスタブ
+gmsv.js : gmsvの本体
+cl.js : クライアントの本体
+game.js : gmsvのゲーム内容(gmsv.jsが読み込む)
+gl-matrix.js : クライアントとサーバーの両方で使う算術ライブラリ
+moyai.js : クライアント用の描画ライブラリ
+moyai_common.js : クライアントとサーバー共用のユーティリティ
+util.js : サーバー用のユーティリティ(gmsv.jsが読み込む)
+rpcgen.js : RPCスタブジェネレータ本体
+testrpc.js : RPCスタブのテスタ
+```
+
+## 初版のMMOサンプルとの違い
+
+初版のMMOサンプルは、
+gmsvがフロントエンドサーバで、その後ろに dbsv, logsv, authsv, などさまざまな種類のバックエンドサーバーがあり、
+それぞれをTCPで接続していた。
+MySQLへの接続はdbsvがlibmysqlclientを用いて行い、gmsvからdbsvはTCP経由でRPCを使って指示をしていた。
+しかしこのレポジトリのMMOサンプルでは、dbsvを経由せずに、 gmsvが直接MySQLに接続している。
+
+その理由は、C++用のlibmysqlがプログラムの実行をブロックするのに対し、
+Node.jsのmysqlモジュールはプログラムをブロックしない、非同期処理をすることが前提の設計になっているためである。
+Node.jsではMySQL以外にも、WebAPIサーバをバックエンドとして用いるときにも非同期の処理を自然に書くことができるようになっていて、
+そのためのPromiseなどの機構も非常によく整備されている。
+したがってNode.jsを用いる場合は、バックエンドサーバーを作る必要がなく、直接非同期処理をフロントエンドのgmsvに書くことができる。
+
+現在では、Node以外でもC#やGoを使えば、フロントエンドサーバーで同様のことができる。(TODO:詳しく？)
+
+C++でもできるが、コード量がどうしても増えてしまう(TODO:それでもサンプル？)
+
+
+
+
