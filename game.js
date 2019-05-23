@@ -103,6 +103,7 @@ class Entity {
             if( (nc.ground==GROUND_GRASS||nc.ground==GROUND_BRIDGE) && nc.obj==OBJ_NONE) {
                 this.loc[0]=nx;
                 this.loc[1]=ny;
+                if(this.onMoved) this.onMoved();
                 return true;
             } else {
                 return false;
@@ -141,14 +142,19 @@ class PC extends Entity {
     constructor(lc,name) {
         super(ENTITY_PC,lc);
         this.name=name;
+        this.kill_count=0;
+        this.walk_count=0;
     }
     poll(dt) {
         this.poll_cnt++;
-        if(this.poll_cnt%100==0) console.log("pc poll.",this.id);
+    }
+    onMoved() {
+        this.walk_count++;
     }
     onHitEntity(e) {
         if(e.type==ENTITY_SKELETON && e.state == ENTITY_STATE_STANDING) {
-            broadcastLog(`${this.name} killed a skeleton!`);
+            this.kill_count++;
+            broadcastLog(`${this.name} killed a skeleton! kill:${this.kill_count} walk:${this.walk_count}`);
             e.state= ENTITY_STATE_DIED;
             broadcastEntity(e);
         }

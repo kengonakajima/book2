@@ -126,7 +126,6 @@ recv_login = function(conn,name) {
     broadcastEntity(conn.pc);    
 }
 recv_tryMove = function(conn,dx,dy) {
-    console.log("trymove:",dx,dy);
     if(!conn.pc)return;
     if(conn.pc.tryMove(dx,dy)) {
         broadcastEntity(conn.pc);        
