@@ -1,4 +1,4 @@
-require("./sample_sv.js");
+require("./mmo_sv.js");
 require("./util.js");
 require("./game.js");
 require("./moyai_common.js");
@@ -101,7 +101,7 @@ app.use(body_parser.urlencoded({extended: true}));
 app.use("/assets", express.static("assets"));
 app.use("/moyai", express.static("moyai"));
 app.use("/cl.js", express.static("cl.js"));
-app.use("/sample_cl.js", express.static("sample_cl.js"));
+app.use("/mmo_cl.js", express.static("mmo_cl.js"));
 app.use("/util.js", express.static("util.js"));
 app.use("/moyai.js", express.static("moyai.js"));
 app.use("/moyai_common.js", express.static("moyai_common.js"));

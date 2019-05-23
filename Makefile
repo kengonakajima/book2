@@ -1,3 +1,3 @@
 test:
-	node sampledef.js
+	node mmodef.js
 	node testrpc.js

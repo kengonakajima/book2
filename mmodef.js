@@ -17,8 +17,8 @@ var defs= {
 
 fs=require("fs");
 var js_cl=rpcgen.generateJS(C2S,defs);
-fs.writeFileSync("sample_cl.js",js_cl);
+fs.writeFileSync("mmo_cl.js",js_cl);
 var js_sv=rpcgen.generateJS(S2C,defs);
-fs.writeFileSync("sample_sv.js",js_sv);
+fs.writeFileSync("mmo_sv.js",js_sv);
 
 
