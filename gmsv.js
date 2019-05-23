@@ -168,6 +168,9 @@ recv_login = function(conn,name) {
             conn.pc.walk_count=r[0].walk_count;
         } else {
             console.log("character",name," not fond, creating");
+            queryDB("insert into characters set name=?, kill_count=0, walk_count=0",[name], function(e,r,f) {
+                if(e) console.log("insert character error:",e);
+            });
         }
 
         send_loginResult(conn,name,1,conn.pc.id);
