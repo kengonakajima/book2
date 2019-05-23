@@ -22,7 +22,7 @@ g_ws.onmessage = function (ev) {
 
 recv_ping = function(conn,val) {
     console.log("recv_ping:",val);
-//    send_login(conn,"testuser");
+    appendLog("ping ok, connected to server.");
 }
 recv_loginResult = function(conn,name,result,pc_entity_id) {
     console.log("recv_loginResult:",name,result,pc_entity_id);
@@ -41,6 +41,7 @@ recv_entity = function(conn,id,type,x,y,state) {
     console.log("recv_entity:",id,type,x,y,state);
     var e=findEntity(id);
     if(!e) {
+        console.log("new entity");
         e=createEntity(id,type,x,y);
     } else {
         e.setFldLoc(x,y);
@@ -52,6 +53,7 @@ recv_entity = function(conn,id,type,x,y,state) {
     }
 }
 recv_entityDelete = function(conn,id) {
+    console.log("recv_entityDelete:",id);
     var e=findEntity(id);
     e.to_clean=true;
 }

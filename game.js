@@ -89,7 +89,7 @@ class Entity {
             var nx=this.loc[0]+dx, ny=this.loc[1]+dy;
             var ne=findEntityByLoc(nx,ny);
             if( ne ) {
-                console.log("checkentity hit at",nx,ny);
+                console.log("checkentity hit at",nx,ny, "state:", ne.state);
                 if(this.onHitEntity) {
                     this.onHitEntity(ne);
                 }
@@ -118,22 +118,20 @@ class Entity {
 class Skeleton extends Entity {
     constructor(lc) {
         super(ENTITY_SKELETON,lc);
-        this.move_mod=irange(50,150);
+        this.move_mod=50;//irange(50,150);
     }
     poll(dt) {
         this.poll_cnt++;
         this.accum_time+=dt;
-        if(this.accum_time>100) {
+        if(this.accum_time>10) {
             this.to_clean=true;
             return;
         }
-
         if(this.poll_cnt%this.move_mod==0) {
             var dx=irange(-1,2), dy=irange(-1,2);
             if(this.state==ENTITY_STATE_STANDING) {
-                if(this.tryMove(dx,dy)) {
-                    broadcastEntity(this);
-                }
+                this.tryMove(dx,dy);
+                broadcastEntity(this);
             }
         }
     }
@@ -201,11 +199,14 @@ function tryPopEnemy() {
         for(var i=0;i<g_entities.length;i++) {
             var e=g_entities[i];
             var dl=gl.vec2.fromValues(lc[0]-e.loc[0],lc[1]-e.loc[1]);
-            if( e.type==ENTITY_PC && gl.vec2.length(dl) > 7 ) {
-                var skel=new Skeleton(lc);
-                g_entities.push(skel);
+            if( e.type==ENTITY_PC && gl.vec2.length(dl) < 7 ) {
+                console.log("too near");
+                return false;
             }
         }
+        var skel=new Skeleton(lc);
+        g_entities.push(skel);
+        broadcastEntity(skel);
     }
 }
 
