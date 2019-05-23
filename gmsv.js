@@ -12,6 +12,45 @@ var os=require("os");
 var my_socketpath=null;
 if(os.platform()=="linux") my_socketpath="/var/lib/mysql/mysql.sock";
 
+//////
+
+
+// grant all privileges on mmosample.* to 'mmosample'@'localhost';
+// create user "mmosample"@"localhost" identified with mysql_native_password by "mmosample";
+var g_mysql_pool = mysql.createPool({
+    host: "localhost" ,
+    socketPath: my_socketpath,
+    user: "mmosample",
+    database: "mmosample",
+    password: "mmosample",
+    connectTimeout: 5*1000
+});
+
+function queryDB() {
+    var arg0=arguments[0], arg1=arguments[1],arg2=arguments[2];
+    g_mysql_pool.getConnection( function(err,conn) {
+        if(err) {
+            console.log("mysql getConnection error:",err);
+            process.exit(1);
+        } else {
+            console.log("executing sql:",arg0,arg1);
+            conn.query(arg0,arg1,arg2);
+            conn.release();
+        }
+    });
+}
+
+queryDB("show tables",[],function(e,r,f) {
+    console.log("mysql tables:",r);
+    queryDB("create table if not exists characters (name varchar(100), kill_count int, walk_count int);",[],function(e,r,f) {
+        if(e) console.log("create table failed:",e);
+    });
+});
+saveCharacter = function(name,kill,walk) {
+    queryDB("update characters set kill_count=?, walk_count=? where name=?",[kill,walk,name], function(e,r,f) {
+        if(e)  console.log("update characters failed:",e);
+    });
+}
 
 
 /////
@@ -38,7 +77,7 @@ ws_server.on('connection', function(conn) {
     conn.on("close", function(e) {
         console.log("close:",conn.pc);
         if(conn.pc) {
-            console.log("KKKK",            g_entities.indexOf(conn.pc) );
+            saveCharacter(conn.pc.name,conn.pc.kill_count,conn.pc.walk_count);
             deleteEntity(conn.pc);
             conn.pc=null;
         }
@@ -54,7 +93,7 @@ express=require("express");
 body_parser=require("body-parser");
 helmet=require("helmet");
 url=require("url");
-//os=require("os");
+
 
 var app = express();
 app.use(helmet());
@@ -82,7 +121,6 @@ var web_server = app.listen(g_web_port, "0.0.0.0", function() {
 });
 
 //////////
-
 
 
 setInterval( gameUpdate,20 );
@@ -114,16 +152,30 @@ sendAllEntities = function(conn) {
 
 recv_login = function(conn,name) {
     console.log("recv_login:",name);
-
-    conn.pc=new PC(gl.vec2.fromValues(5,5),name);
-    g_entities.push(conn.pc);
-
     
-    send_loginResult(conn,name,1,conn.pc.id);
-    send_field(conn,g_fld.width,g_fld.height,g_fld.ground,g_fld.obj);
+    queryDB("select * from characters where name=?",[name], function(e,r,f) {
+        if(e) {
+            console.log("load character error:",e) ;
+            send_loginResult(conn,name,0,0);
+            return;
+        } 
+        conn.pc=new PC(gl.vec2.fromValues(5,5),name);
+        g_entities.push(conn.pc);
+        
+        if(r.length==1) {
+            console.log("character",name,"found",r) ;
+            conn.pc.kill_count=r[0].kill_count;
+            conn.pc.walk_count=r[0].walk_count;
+        } else {
+            console.log("character",name," not fond, creating");
+        }
 
-    sendAllEntities(conn);
-    broadcastEntity(conn.pc);    
+        send_loginResult(conn,name,1,conn.pc.id);
+        send_field(conn,g_fld.width,g_fld.height,g_fld.ground,g_fld.obj);
+        sendAllEntities(conn);
+        broadcastEntity(conn.pc);
+        broadcastLog(`${name} joined. walk:${conn.pc.walk_count} kill:${conn.pc.kill_count}`);
+    });
 }
 recv_tryMove = function(conn,dx,dy) {
     if(!conn.pc)return;
