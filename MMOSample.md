@@ -50,6 +50,30 @@ grant all privileges on mmosample.* to 'mmosample'@'localhost';
 MySQL - gmsv(gmsv.js) - cl(index.html,cl.js)
 ```
 
+## セーブデータの内容
+
+プレイヤーキャラクターの名前、スケルトンを殺した数、歩いた歩数がセーブされます。
+MySQLのクライアントを開いて、以下のように内容を確認して下さい。
+
+
+```
+[@mbp2018 book2]$ mysql -ummosample -pmmosample
+mysql> select * from characters;
+mysql> use mmosample;
+mysql> select * from characters;
++------+------------+------------+
+| name | kill_count | walk_count |
++------+------------+------------+
+| aaaa |         10 |        181 |
+| asdf |          0 |         13 |
++------+------------+------------+
+1 row in set (0.00 sec)
+```
+
+現在はパスワード認証を実装していませんが、同じ名前でログインしたら、
+上記のテーブルからキャラクターデータを読み込んで、続きからプレイできます。
+
+
 ## ソース
 
 ```
