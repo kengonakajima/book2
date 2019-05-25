@@ -5,7 +5,7 @@
   "nodemonConfig": {
     "ignore": [
       ".git",
-      "cl.js"
+      "mmo_client.js"
     ]
   },
   "dependencies": {

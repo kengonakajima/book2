@@ -47,7 +47,7 @@ grant all privileges on mmosample.* to 'mmosample'@'localhost';
 ## システム構成
 
 ```
-MySQL - gmsv(gmsv.js) - cl(index.html,cl.js)
+MySQL - gmsv(gmsv.js) - cl(index.html,mmo_client.js)
 ```
 
 ## セーブデータの内容
@@ -81,7 +81,7 @@ mmodef.js : RPC定義ファイル
 mmoproto_cl.js : クライアント用RPCスタブ
 mmoproto_sv.js : サーバー用RPCスタブ
 gmsv.js : gmsvの本体
-cl.js : クライアントの本体
+mmo_client.js : クライアントの本体
 mmo_game.js : gmsvのゲーム内容(gmsv.jsが読み込む)
 gl-matrix.js : クライアントとサーバーの両方で使う算術ライブラリ
 moyai.js : クライアント用の描画ライブラリ
