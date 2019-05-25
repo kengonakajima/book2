@@ -15,9 +15,16 @@ g_ws.onclose = function() {
 g_ws.onerror = function(error) {
     console.log("ws Error",error);
 };
+
+var g_debug_latency=0;
 g_ws.onmessage = function (ev) {
-//    console.log("ev.data:",ev.data,ev);
-    recv_binary_message(g_ws,ev.data);
+    if(g_debug_latency>0) {
+        setTimeout( function() {
+            recv_binary_message(g_ws,ev.data);        
+        },g_debug_latency);
+    } else {
+        recv_binary_message(g_ws,ev.data);                
+    }
 };
 
 recv_ping = function(conn,val) {
