@@ -47,7 +47,7 @@ grant all privileges on mmosample.* to 'mmosample'@'localhost';
 ## システム構成
 
 ```
-MySQL - gmsv(gmsv.js) - cl(index.html,mmo_client.js)
+MySQL - gmsv(gmsv.js) - cl(mmo_index.html,mmo_client.js)
 ```
 
 ## セーブデータの内容

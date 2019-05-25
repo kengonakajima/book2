@@ -112,7 +112,7 @@ app.use("/mmo_game.js", express.static("mmo_game.js"));
 
 app.get("/", function(req, res, next){
     console.log("get /");
-    res.sendFile( process.env.PWD + "/index.html" );
+    res.sendFile( process.env.PWD + "/mmo_index.html" );
 });
 
 
