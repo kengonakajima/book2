@@ -82,7 +82,7 @@ mmoproto_cl.js : クライアント用RPCスタブ
 mmoproto_sv.js : サーバー用RPCスタブ
 gmsv.js : gmsvの本体
 cl.js : クライアントの本体
-game.js : gmsvのゲーム内容(gmsv.jsが読み込む)
+mmo_game.js : gmsvのゲーム内容(gmsv.jsが読み込む)
 gl-matrix.js : クライアントとサーバーの両方で使う算術ライブラリ
 moyai.js : クライアント用の描画ライブラリ
 moyai_common.js : クライアントとサーバー共用のユーティリティ
