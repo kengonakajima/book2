@@ -1,5 +1,5 @@
 require("./util.js");
-require("./mmo_cl.js");
+require("./mmoproto_cl.js");
 
 var conn={send:function(ab) { console.log("sending:",ab); } };
 

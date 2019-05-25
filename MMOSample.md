@@ -78,8 +78,8 @@ mysql> select * from characters;
 
 ```
 mmodef.js : RPC定義ファイル
-mmo_cl.js : クライアント用RPCスタブ
-mmo_sv.js : サーバー用RPCスタブ
+mmoproto_cl.js : クライアント用RPCスタブ
+mmoproto_sv.js : サーバー用RPCスタブ
 gmsv.js : gmsvの本体
 cl.js : クライアントの本体
 game.js : gmsvのゲーム内容(gmsv.jsが読み込む)
