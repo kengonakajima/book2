@@ -33,3 +33,10 @@ g_base_deck.setSize(32,32,8,8 );
 var g_base_deck = new TileDeck();
 g_base_deck.setTexture(g_base_atlas);
 g_base_deck.setSize(32,32,8,8);
+
+///////////
+
+function appendLog(msg) {
+    var log=document.getElementById("log");
+    log.innerText+=msg+"\n";
+}

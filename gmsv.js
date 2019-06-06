@@ -1,5 +1,7 @@
 require("./mmoproto_sv.js");
 require("./util.js");
+require("./field.js");
+require("./entity.js");
 require("./mmo_game.js");
 require("./moyai_common.js");
 gl=require("./gl-matrix.js");
@@ -109,7 +111,8 @@ app.use("/moyai_common.js", express.static("moyai_common.js"));
 app.use("/gl-matrix.js", express.static("gl-matrix.js"));
 app.use("/base.png", express.static("base.png"));
 app.use("/mmo_game.js", express.static("mmo_game.js"));
-
+app.use("/field.js", express.static("field.js"));
+app.use("/entity.js", express.static("entity.js"));
 
 app.get("/", function(req, res, next){
     console.log("get /");

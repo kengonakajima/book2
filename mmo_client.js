@@ -203,7 +203,5 @@ function loginPressed() {
     var input=document.getElementById("loginname");
     send_login(g_ws, input.value);
 }
-function appendLog(msg) {
-    var log=document.getElementById("log");
-    log.innerText+=msg+"\n";
-}
+
+  
