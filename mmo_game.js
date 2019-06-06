@@ -1,8 +1,22 @@
 ///////////////
 
 
+
+
 gameInit = function() {
     g_fld=new Field(32,24);
+    g_fld.generate = function() {
+        for(var i=0;i<this.width*this.height;i++){
+            this.ground[i]=GROUND_GRASS;
+            var y=Math.floor(i/this.width), x=i%this.width;
+            if((x+y==28 || x+y==27) ) {
+                if(this.ground[i]!=GROUND_WATER) this.ground[i]=GROUND_WATER;
+                if(y==10) this.ground[i]=GROUND_BRIDGE;
+            }
+            if(Math.random()<0.02 && this.ground[i]!=GROUND_WATER) this.obj[i]=OBJ_TREE; else this.obj[i]=OBJ_NONE;
+        }
+        console.log(this.dumpField());
+    }
     g_fld.generate();
 
     g_entities=[];
