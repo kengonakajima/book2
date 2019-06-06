@@ -100,6 +100,7 @@ app.use(helmet());
 app.use(body_parser.urlencoded({extended: true}));
 app.use("/assets", express.static("assets"));
 app.use("/moyai", express.static("moyai"));
+app.use("/common_client.js", express.static("common_client.js"));
 app.use("/mmo_client.js", express.static("mmo_client.js"));
 app.use("/mmoproto_cl.js", express.static("mmoproto_cl.js"));
 app.use("/util.js", express.static("util.js"));

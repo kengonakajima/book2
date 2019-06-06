@@ -1,6 +1,3 @@
-
-// oryx lofi のmap1.pngをいめーじ
-
 OBJ_NONE=0;
 OBJ_TREE=1;
 
