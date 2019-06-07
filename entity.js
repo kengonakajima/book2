@@ -49,6 +49,26 @@ class Entity {
     }    
 };
 
+deleteEntity = function(e) {
+    var ind=g_entities.indexOf(e) ;
+    if(ind>=0) {
+        console.log("deleteEntity:",ind,e);
+        g_entities.splice(ind,1);
+        return true;
+    }
+    return false;
+}
+findEntityByLoc = function(x,y) {
+    for(var i=0;i<g_entities.length;i++) {
+        var e=g_entities[i];
+        if(e.loc[0]==x && e.loc[1]==y){
+            return e;
+        }
+    }
+    return null;
+}
+
+/////////
 
 class Skeleton extends Entity {
     constructor(lc) {

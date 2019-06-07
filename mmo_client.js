@@ -133,42 +133,6 @@ animate();
 
 ///////////
 
-function setupFieldGrid() {
-    var p = new Prop2D();
-    p.setDeck(g_base_deck);
-    p.setScl(20,20);
-    p.setLoc(-SCRW/2,-SCRH/2);
-    p.setIndex(-1);
-    var groundgrid = new Grid(g_fld.width,g_fld.height);
-    groundgrid.setDeck(g_base_deck);
-    p.addGrid(groundgrid);
-    var objgrid = new Grid(g_fld.width,g_fld.height);
-    objgrid.setDeck(g_base_deck);
-    p.addGrid(objgrid);
-    for(var x=0;x<g_fld.width;x++){
-        for(var y=0;y<g_fld.height;y++){
-            var cell=g_fld.getCell(x,y);
-            var gr_ind=-1, obj_ind=-1;
-            switch(cell.ground) {
-            case GROUND_GRASS: gr_ind=3; break;
-            case GROUND_WATER: gr_ind=4; break;
-            case GROUND_BRIDGE: gr_ind=5; break;
-            }
-            switch(cell.obj) {
-            case OBJ_TREE: obj_ind=2; break;
-                
-            }
-            groundgrid.set(x,y,gr_ind);
-            objgrid.set(x,y,obj_ind);
-            
-//            console.log("cell:",x,y,cell);
-        }
-    }
-    p.prop2DPoll = function(dt) {
-        return true;
-    }
-    g_main_layer.insertProp(p);
-}
 //////////////
 function findEntity(eid) {
     for(var i=0;i<g_main_layer.props.length;i++) {

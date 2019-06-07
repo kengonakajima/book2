@@ -1,5 +1,7 @@
 OBJ_NONE=0;
 OBJ_TREE=1;
+OBJ_RED_HOUSE=2;
+OBJ_BLUE_HOUSE=3;
 
 GROUND_GRASS=1;
 GROUND_WATER=2;
@@ -38,6 +40,8 @@ class Field {
                 }
                 switch(this.obj[ind]) {
                 case OBJ_TREE: ch="T"; break;
+                case OBJ_RED_HOUSE: ch="R"; break;
+                case OBJ_BLUE_HOUSE: ch="B"; break;
                 default: break;
                 }
                 s+=ch;
