@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node ./gmsv"
+    "start": "node ./mmo_gmsv"
   },
   "nodemonConfig": {
     "ignore": [
