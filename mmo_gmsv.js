@@ -60,7 +60,7 @@ saveCharacter = function(name,kill,walk) {
 var g_web_port=3000;
 var g_ws_port=22222;
 
-console.log("gmsv started");
+console.log("MMO gmsv started");
 
 var ws_server = new WebSocket.Server({
     port: g_ws_port
@@ -93,20 +93,12 @@ ws_server.on('connection', function(conn) {
 
 express=require("express");
 body_parser=require("body-parser");
-helmet=require("helmet");
-url=require("url");
-
 
 var app = express();
-app.use(helmet());
-app.use(body_parser.urlencoded({extended: true}));
 app.use("/",express.static("./"));
-
 app.get("/", function(req, res, next){
-    console.log("get /");
     res.sendFile( process.env.PWD + "/mmo_index.html" );
 });
-
 
 var web_server = app.listen(g_web_port, "0.0.0.0", function() {
     console.log("web server is listening on port:",web_server.address().port);
@@ -114,10 +106,8 @@ var web_server = app.listen(g_web_port, "0.0.0.0", function() {
 
 //////////
 
-
 setInterval( gameUpdate,20 );
 gameInit();
-
 
 //////////////
 sendEntity = function(conn,e) {
