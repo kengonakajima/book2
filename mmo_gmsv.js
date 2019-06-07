@@ -92,7 +92,6 @@ ws_server.on('connection', function(conn) {
 // web server
 
 express=require("express");
-body_parser=require("body-parser");
 
 var app = express();
 app.use("/",express.static("./"));
