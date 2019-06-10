@@ -2,18 +2,28 @@
   <head>
   </head>
   <body>
-    <span id="inputname">Input room name: <input type="text" id="roomname"><input type="submit" onclick="loginPressed();"><BR></span>
-    <div id="screen"></div>
-    MO sample: Click/Tap to put a soldier.
-    <div id="log"></div>
+    <div style="">
+      <div style="position:absolute; left:20px; top:20px; font-size:20px; color:white; " id="state">Game paused</div>
+      <div style="position:absolute; left:20px; top:50px; font-size:20px; color:white; " id="turn">Turn 0</div>
+      <div id="screen"></div>
+      MO sample: Click/Tap to put a soldier.
+    </div>
+    
+    <input type="submit" onclick="createRoomPressed();" value="create room">
+    <div>
+      <input type="text" id="roomid" value="1">    <input type="submit" onclick="joinRoomPressed();" value="join">
+    </div>
 
+    <div id="log"></div>
+    
     <script type="text/javascript" src="util.js"></script>
     <script type="text/javascript" src="gl-matrix.js"></script>    
     <script type="text/javascript" src="moyai_common.js"></script>
     <script type="text/javascript" src="moyai.js"></script>
     <script type="text/javascript" src="common_client.js"></script>
     <script type="text/javascript" src="field.js"></script>
-    <script type="text/javascript" src="entity.js"></script>        
+    <script type="text/javascript" src="entity.js"></script>
+    <script type="text/javascript" src="moproto_cl.js"></script>        
     <script type="text/javascript" src="mo_client.js"></script>    
   </body>
 </html>  

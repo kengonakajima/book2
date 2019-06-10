@@ -74,7 +74,6 @@ recv_log = function(conn,msg) {
 
 var anim_cnt=0;
 var last_anim_at = new Date().getTime();
-var g_yellow_line_prim_id;
 
 function animate() {
     anim_cnt++;

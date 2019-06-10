@@ -29,6 +29,15 @@ send_joinRoom=function(target,room_id)
  _dv.setInt32(_ofs,room_id|0,true); _ofs+=4;
  target.send(_ab)
 }
+send_gameStart=function(target,)
+{
+ var _totlen=0;
+ var _ab=new ArrayBuffer(_totlen+2);
+ var _dv=new DataView(_ab);
+ var _ofs=0;
+ _dv.setUint16(_ofs,7,true); _ofs+=2;
+ target.send(_ab)
+}
 send_syncObj=function(target,entity_id,type_id,x,y)
 {
  var _totlen=0;
@@ -39,7 +48,7 @@ send_syncObj=function(target,entity_id,type_id,x,y)
  var _ab=new ArrayBuffer(_totlen+2);
  var _dv=new DataView(_ab);
  var _ofs=0;
- _dv.setUint16(_ofs,6,true); _ofs+=2;
+ _dv.setUint16(_ofs,8,true); _ofs+=2;
  _dv.setInt32(_ofs,entity_id|0,true); _ofs+=4;
  _dv.setInt32(_ofs,type_id|0,true); _ofs+=4;
  _dv.setInt32(_ofs,x|0,true); _ofs+=4;
@@ -52,7 +61,7 @@ send_leaveRoom=function(target,)
  var _ab=new ArrayBuffer(_totlen+2);
  var _dv=new DataView(_ab);
  var _ofs=0;
- _dv.setUint16(_ofs,7,true); _ofs+=2;
+ _dv.setUint16(_ofs,9,true); _ofs+=2;
  target.send(_ab)
 }
 recv_binary_message = function(target,arybuf) {
@@ -73,7 +82,13 @@ recv_binary_message = function(target,arybuf) {
   var room_id=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_joinRoomResult(target,result,room_id);
  }; break;
- case 6: { // syncObj
+ case 6: { // joinNotify
+  recv_joinNotify(target,);
+ }; break;
+ case 7: { // gameStart
+  recv_gameStart(target,);
+ }; break;
+ case 8: { // syncObj
   var entity_id=_dv.getInt32(_ofs,true); _ofs+=4;
   var type_id=_dv.getInt32(_ofs,true); _ofs+=4;
   var x=_dv.getInt32(_ofs,true); _ofs+=4;

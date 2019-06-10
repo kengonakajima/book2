@@ -36,9 +36,12 @@ g_base_deck.setSize(32,32,8,8);
 
 ///////////
 
-function appendLog(msg) {
+function appendLog() {
+    var args = Array.prototype.slice.call(arguments);
+    var msg = args.join(" ");
     var log=document.getElementById("log");
     log.innerText+=msg+"\n";
+    console.log(msg);
 }
 
 function setupFieldGrid() {

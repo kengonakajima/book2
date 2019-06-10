@@ -1,3 +1,30 @@
+
+var wsaddr = document.location.host.split(":")[0];
+var g_ws=new WebSocket( "ws://"+wsaddr+":22222", ["game-protocol"]);
+g_ws.binaryType = "arraybuffer";
+g_ws.onopen = function() {
+    console.log("ws opened");
+};
+g_ws.onclose = function() {
+    console.log("ws closed");
+};
+g_ws.onerror = function(error) {
+    console.log("ws Error",error);
+};
+
+var g_debug_latency=0;
+g_ws.onmessage = function (ev) {
+    if(g_debug_latency>0) {
+        setTimeout( function() {
+            recv_binary_message(g_ws,ev.data);        
+        },g_debug_latency);
+    } else {
+        recv_binary_message(g_ws,ev.data);                
+    }
+};
+
+
+
 ///////////
 
 function gameInit() {
@@ -24,9 +51,16 @@ function gameInit() {
     g_fld.generate();
     
     setupFieldGrid();
+
+    setGameState("stopped");
 }
 
-
+var g_game_state;
+function setGameState(state) {
+    g_game_state=state;
+    var e=document.getElementById("state");
+    e.innerHTML = "Game " + state;
+}
 
 
 //////////////
@@ -34,7 +68,7 @@ function gameInit() {
 
 var anim_cnt=0;
 var last_anim_at = new Date().getTime();
-var g_yellow_line_prim_id;
+
 
 function animate() {
     anim_cnt++;
@@ -55,6 +89,10 @@ function animate() {
     last_anim_at = now_time;
     Moyai.poll(dt/1000.0);
     Moyai.render();
+
+    if(g_game_state=="started") {
+        
+    }
 }
 
 animate();
@@ -62,3 +100,35 @@ animate();
 var g_fld=new Field(32,24);
 
 gameInit();
+
+////////////
+function createRoomPressed() {
+    send_createRoom(g_ws);
+}
+function joinRoomPressed() {
+    var roomid=parseInt(document.getElementById("roomid").value);
+    send_joinRoom(g_ws,roomid);
+    setGameState("waiting");
+}
+
+
+///////////
+recv_ping = function(conn,val) {
+    appendLog("recv_ping:",val);
+}
+recv_createRoomResult = function(conn,roomid) {
+    appendLog("recv_createRoomResult roomid:",roomid);
+    setGameState("waiting");    
+}
+recv_joinRoomResult = function(conn,result,roomid) {
+    appendLog("recv_joinRoomResult result:",result,"roomid:",roomid);
+}
+recv_joinNotify = function(conn) {
+    appendLog("recv_joinNotify");
+    send_gameStart(conn);
+    setGameState("started");
+}
+recv_gameStart = function(conn) {
+    appendLog("recv_gameStart");
+    setGameState("started");
+}
