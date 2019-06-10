@@ -98,7 +98,14 @@ function gameUpdate() {
         if(g_soldier_left>10) g_soldier_left=10;
         updateSoldierLeft();
     }
-    
+    // move soldier
+    for(var i=0;i<g_soldiers.length;i++) {
+        var s=g_soldiers[i];
+        if(s.moved_at < g_turn - 60) {
+            s.tryMove();
+            s.moved_at=g_turn;
+        }
+    }
 }
 //////////////
 function checkGridPuttable(gx,gy) {
@@ -117,11 +124,64 @@ function checkGridPuttable(gx,gy) {
     return true;
 }
 
+function ind(x,y) {
+    return x+y*32;
+}
+var g_route=new Int32Array(24*32); // 0:OK -1:obj, -2:soldier
+function findRoute(fx,fy,tx,ty) {
+    for(var i=0;i<24*32;i++) {
+        if(g_fld.ground[i]==GROUND_WATER) g_route[i]=-1;
+        if(g_fld.obj[i]) g_route[i]=-1;
+    }
+    for(var i=0;i<g_soldiers.length;i++) {
+        var s=g_soldiers[i];
+        g_route[ind(s.gx,s.gy)]=-2;
+    }
+    g_route[ind(tx,ty)]=1; // starting point
+    g_route[ind(fx,fy)]=0; // goal point
+    for(var i=0;i<30;i++) {
+        for(var y=1;y<23;y++) {
+            for(var x=1;x<31;x++) {
+                if(g_route[ind(x,y)]==0) {
+                    if(g_route[ind(x+1,y)]>0) g_route[ind(x,y)]=g_route[ind(x+1,y)]+1;
+                    if(g_route[ind(x-1,y)]>0) g_route[ind(x,y)]=g_route[ind(x-1,y)]+1;
+                    if(g_route[ind(x,y+1)]>0) g_route[ind(x,y)]=g_route[ind(x,y+1)]+1;
+                    if(g_route[ind(x,y-1)]>0) g_route[ind(x,y)]=g_route[ind(x,y-1)]+1;
+                }
+            }
+        }
+    }
+    /*
+    for(var y=0;y<24;y++) {
+        var a=[];
+        for(var x=0;x<32;x++) {
+            a.push(g_route[ind(x,y)]);
+        }
+        console.log(a.join(" "));
+        }*/
+    
+    var from_route = g_route[ind(fx,fy)];
+    var min_route=from_route;
+    var u_route = g_route[ind(fx,fy+1)];
+    var d_route = g_route[ind(fx,fy-1)];
+    var l_route = g_route[ind(fx-1,fy)];
+    var r_route = g_route[ind(fx+1,fy)];
+    if(u_route>0 && u_route<min_route)min_route=u_route;
+    if(d_route>0 && d_route<min_route)min_route=d_route;
+    if(l_route>0 && l_route<min_route)min_route=l_route;
+    if(r_route>0 && r_route<min_route)min_route=r_route;
+    if(min_route==u_route) return {x:0,y:1};
+    if(min_route==d_route) return {x:0,y:-1};
+    if(min_route==l_route) return {x:-1,y:0};
+    if(min_route==r_route) return {x:1,y:0};
+    return {x:0,y:0};
+}
 var g_soldiers=[];
 
 class Soldier extends Prop2D {
-    constructor(gx,gy,red) {
+    constructor(gx,gy,red,turn) {
         super();
+        this.moved_at=turn;
         this.damage=0;
         this.red=red;
         this.setDeck(g_base_deck);
@@ -130,6 +190,7 @@ class Soldier extends Prop2D {
         if(!red)this.setXFlip(true);
         this.gx=gx;
         this.gy=gy;
+        g_soldiers.push(this);
         g_main_layer.insertProp(this);
     }
     prop2DPoll(dt) {
@@ -140,11 +201,34 @@ class Soldier extends Prop2D {
         var base=72 + (this.red?0:1);
         return base + this.damage*2;
     }
+    tryMove() {
+        var goalx,goaly=11;
+        if(this.red) {
+            goalx=31-2;
+        } else {
+            goalx=2;
+        }
+        var to_move=findRoute(this.gx,this.gy,goalx,goaly);
+        var nx=this.gx+to_move.x;
+        var ny=this.gy+to_move.y;
+        if(isSoldier(nx,ny))return;
+        this.gx=nx;
+        this.gy=ny;
+    }
 };
 
+function isSoldier(gx,gy) {
+    for(var i=0;i<g_soldiers.length;i++) {
+        if(g_soldiers[i] && g_soldiers[i].gx==gx && g_soldiers[i].gy==gy) {
+            return true;
+        }
+    }
+    return false;
+}
 function clickOnField(gx,gy) {
     if(!checkGridPuttable(gx,gy))return;
-    var sl=new Soldier(gx,gy);
+    if( isSoldier(gx,gy) )return;
+    var sl=new Soldier(gx,gy,g_game_role=="host",g_turn);
     
     
 }
@@ -164,7 +248,7 @@ function animate() {
     var gx=Math.floor((x+SCRW/2)/20), gy=Math.floor((y+SCRH/2)/20);    
     if(g_mouse.getToggled(0)) {
         g_mouse.clearToggled(0);
-        console.log("mousebutton0:",x,y);
+        console.log("mousebutton0:",gx,gy);
         clickOnField(gx,gy);
     }
     if(g_touch.touching) {
