@@ -1,11 +1,12 @@
 {
   "scripts": {
-    "start": "node ./mmo_gmsv"
+    "start": "node ./mo_gmsv"
   },
   "nodemonConfig": {
     "ignore": [
-      ".git",
-      "mmo_client.js"
+        ".git",
+        "mo_client.js",
+        "mmo_client.js"        
     ]
   },
   "dependencies": {
