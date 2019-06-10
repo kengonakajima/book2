@@ -101,8 +101,52 @@ function gameUpdate() {
     
 }
 //////////////
+function checkGridPuttable(gx,gy) {
+    if(g_game_state!="started") {
+        return false;        
+    } else {
+        if(g_game_role=="host" && gx>14){
+            return false;
+        } else if(g_game_role=="guest" && gx<17) {
+            return false;
+        } else {
+            var cell=g_fld.getCell(gx,gy);
+            if(cell && cell.obj) return false;
+        }
+    }
+    return true;
+}
+
+var g_soldiers=[];
+
+class Soldier extends Prop2D {
+    constructor(gx,gy,red) {
+        super();
+        this.damage=0;
+        this.red=red;
+        this.setDeck(g_base_deck);
+        this.setScl(20);
+        this.setIndex(this.calcIndex());
+        if(!red)this.setXFlip(true);
+        this.gx=gx;
+        this.gy=gy;
+        g_main_layer.insertProp(this);
+    }
+    prop2DPoll(dt) {
+        this.setLoc( this.gx*20-SCRW/2+10, this.gy*20-SCRH/2+10);
+        return true;
+    }
+    calcIndex() {
+        var base=72 + (this.red?0:1);
+        return base + this.damage*2;
+    }
+};
+
 function clickOnField(gx,gy) {
-    console.log("clickOnField:",gx,gy);
+    if(!checkGridPuttable(gx,gy))return;
+    var sl=new Soldier(gx,gy);
+    
+    
 }
 //////////////
 
@@ -130,17 +174,8 @@ function animate() {
     }
     if(g_gridcursor) {
         g_gridcursor.setLoc(gx*20-SCRW/2+10,gy*20-SCRH/2+10);
-        var cant=false;
-        if(g_game_state!="started") {
-            cant=true;
-        } else {
-            if(g_game_role=="host" && gx>14){
-                cant=true;
-            } else if(g_game_role=="guest" && gx<17) {
-                cant=true
-            }
-        }
-        g_gridcursor.setIndex(cant?194:193);
+        var puttable=checkGridPuttable(gx,gy);
+        g_gridcursor.setIndex(puttable?193:194);
     }
 
     //////
