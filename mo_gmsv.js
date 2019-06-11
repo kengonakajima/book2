@@ -80,15 +80,17 @@ recv_joinRoom = function(conn,roomid) {
     send_joinRoomResult(conn,0,roomid);
     send_joinNotify(room.conn0);    
 }    
-recv_gameStart = function(conn) {
-    console.log("recv_gameStart");
+recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
+    console.log("recv_command",cmd,arg0,arg1,arg2,arg3);
     if(!conn.room) {
         console.log("no room yet");
         return;
     }
-    if(conn != conn.room.conn0) {
-        console.log("only conn0 can start game");
-        return;
+    if(conn == conn.room.conn0) {
+        send_command(conn.room.conn1,cmd,arg0,arg1,arg2,arg3);        
+    } else if(conn==conn.room.conn1) {
+        send_command(conn.room.conn0,cmd,arg0,arg1,arg2,arg3);        
+    } else {
+        console.log("cant find destination");
     }
-    send_gameStart(conn.room.conn1);
 }

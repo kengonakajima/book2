@@ -42,30 +42,32 @@ send_joinNotify=function(target,)
  _dv.setUint16(_ofs,6,true); _ofs+=2;
  target.send(_ab)
 }
-send_gameStart=function(target,)
+send_leaveRoomNotify=function(target,)
 {
  var _totlen=0;
- var _ab=new ArrayBuffer(_totlen+2);
- var _dv=new DataView(_ab);
- var _ofs=0;
- _dv.setUint16(_ofs,7,true); _ofs+=2;
- target.send(_ab)
-}
-send_syncObj=function(target,entity_id,type_id,x,y)
-{
- var _totlen=0;
- _totlen+=4; // entity_id;
- _totlen+=4; // type_id;
- _totlen+=4; // x;
- _totlen+=4; // y;
  var _ab=new ArrayBuffer(_totlen+2);
  var _dv=new DataView(_ab);
  var _ofs=0;
  _dv.setUint16(_ofs,8,true); _ofs+=2;
- _dv.setInt32(_ofs,entity_id|0,true); _ofs+=4;
- _dv.setInt32(_ofs,type_id|0,true); _ofs+=4;
- _dv.setInt32(_ofs,x|0,true); _ofs+=4;
- _dv.setInt32(_ofs,y|0,true); _ofs+=4;
+ target.send(_ab)
+}
+send_command=function(target,cmd,arg0,arg1,arg2,arg3)
+{
+ var _totlen=0;
+ _totlen+=4; // cmd;
+ _totlen+=4; // arg0;
+ _totlen+=4; // arg1;
+ _totlen+=4; // arg2;
+ _totlen+=4; // arg3;
+ var _ab=new ArrayBuffer(_totlen+2);
+ var _dv=new DataView(_ab);
+ var _ofs=0;
+ _dv.setUint16(_ofs,9,true); _ofs+=2;
+ _dv.setInt32(_ofs,cmd|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,arg0|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,arg1|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,arg2|0,true); _ofs+=4;
+ _dv.setInt32(_ofs,arg3|0,true); _ofs+=4;
  target.send(_ab)
 }
 recv_binary_message = function(target,arybuf) {
@@ -84,18 +86,16 @@ recv_binary_message = function(target,arybuf) {
   var room_id=_dv.getInt32(_ofs,true); _ofs+=4;
   recv_joinRoom(target,room_id);
  }; break;
- case 7: { // gameStart
-  recv_gameStart(target,);
- }; break;
- case 8: { // syncObj
-  var entity_id=_dv.getInt32(_ofs,true); _ofs+=4;
-  var type_id=_dv.getInt32(_ofs,true); _ofs+=4;
-  var x=_dv.getInt32(_ofs,true); _ofs+=4;
-  var y=_dv.getInt32(_ofs,true); _ofs+=4;
-  recv_syncObj(target,entity_id,type_id,x,y);
- }; break;
- case 9: { // leaveRoom
+ case 7: { // leaveRoom
   recv_leaveRoom(target,);
+ }; break;
+ case 9: { // command
+  var cmd=_dv.getInt32(_ofs,true); _ofs+=4;
+  var arg0=_dv.getInt32(_ofs,true); _ofs+=4;
+  var arg1=_dv.getInt32(_ofs,true); _ofs+=4;
+  var arg2=_dv.getInt32(_ofs,true); _ofs+=4;
+  var arg3=_dv.getInt32(_ofs,true); _ofs+=4;
+  recv_command(target,cmd,arg0,arg1,arg2,arg3);
  }; break;
  default:console.log('invalid func_id:',_func_id);break;
  };

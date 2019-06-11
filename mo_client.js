@@ -99,11 +99,13 @@ function gameUpdate() {
         updateSoldierLeft();
     }
     // move soldier
-    for(var i=0;i<g_soldiers.length;i++) {
-        var s=g_soldiers[i];
-        if(s.moved_at < g_turn - 15) {
-            s.tryMove();
-            s.moved_at=g_turn;
+    if(g_game_role=="host") {
+        for(var i=0;i<g_soldiers.length;i++) {
+            var s=g_soldiers[i];
+            if(s.moved_at < g_turn - 15) {
+                s.tryMove();
+                s.moved_at=g_turn;
+            }
         }
     }
 }
@@ -192,10 +194,11 @@ function findRoute(fx,fy,tx,ty) {
     return {x:0,y:0};
 }
 var g_soldiers=[];
-
+var g_soldier_id_gen=1;
 class Soldier extends Prop2D {
     constructor(gx,gy,red,turn) {
         super();
+        this.id=g_soldier_id_gen++;
         this.moved_at=turn;
         this.damage=0;
         this.red=red;
@@ -232,17 +235,25 @@ class Soldier extends Prop2D {
         if(this.red && cell.obj==OBJ_BLUE_HOUSE) {
             g_fld.setObj(nx,ny,OBJ_BLUE_HOUSE_BROKEN);
             updateFieldGrid(g_field_prop);
+            send_command(g_ws,COMMAND_SET_FIELD_OBJECT,nx,ny,OBJ_BLUE_HOUSE_BROKEN);
             return;
         } else if(!this.red && cell.obj==OBJ_RED_HOUSE) {
             g_fld.setObj(nx,ny,OBJ_RED_HOUSE_BROKEN);
             updateFieldGrid(g_field_prop);
+            send_command(g_ws,COMMAND_SET_FIELD_OBJECT,nx,ny,OBJ_RED_HOUSE_BROKEN);            
             return;
         }
         this.gx=nx;
         this.gy=ny;
+        send_command(g_ws,COMMAND_MOVED_SOLDIER,this.id,nx,ny)
     }
 };
-
+function getSoldierById(id) {
+    for(var i=0;i<g_soldiers.length;i++) {
+        if(g_soldiers[i].id==id)return g_soldiers[i];
+    }
+    return null;
+}
 function isSoldier(gx,gy) {
     for(var i=0;i<g_soldiers.length;i++) {
         if(g_soldiers[i] && g_soldiers[i].gx==gx && g_soldiers[i].gy==gy) {
@@ -252,14 +263,16 @@ function isSoldier(gx,gy) {
     return false;
 }
 function clickOnField(gx,gy) {
-//    if(!checkGridPuttable(gx,gy))return;
-    //    if( isSoldier(gx,gy) )return;
+    if(!checkGridPuttable(gx,gy))return;
+    if( isSoldier(gx,gy) )return;
     var is_red = (g_game_role=="host");
-    if(gx<14)is_red=true; else is_red=false;
     console.log("clickOnField is_red:",is_red);
-    if(gx>0 && gy>0 && gx<30 && gy<23)    var sl=new Soldier(gx,gy,is_red,g_turn);
-    
-    
+    if(is_red) {
+        var sl=new Soldier(gx,gy,is_red,g_turn);
+        send_command(g_ws, COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_RED);
+    } else {
+        send_command(g_ws, COMMAND_PUT_SOLDIER, gx,gy);
+    }
 }
 //////////////
 
@@ -323,6 +336,16 @@ function joinRoomPressed() {
 
 
 ///////////
+
+COMMAND_GAMESTART = 1;
+COMMAND_PUT_SOLDIER = 2;
+COMMAND_CREATED_SOLDIER = 3;
+COMMAND_MOVED_SOLDIER = 4;
+COMMAND_SET_FIELD_OBJECT = 5;
+
+SOLDIER_RED = 1;
+SOLDIER_BLUE = 2;
+
 recv_ping = function(conn,val) {
     appendLog("recv_ping:",val);
 }
@@ -335,12 +358,45 @@ recv_joinRoomResult = function(conn,result,roomid) {
 }
 recv_joinNotify = function(conn) {
     appendLog("recv_joinNotify");
-    send_gameStart(conn);
+    send_command(conn, COMMAND_GAMESTART);
     setGameState("started");
     g_turn=0;
 }
-recv_gameStart = function(conn) {
-    appendLog("recv_gameStart");
-    setGameState("started");
-    g_turn=0;    
+recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
+    appendLog("recv_command",cmd,arg0,arg1,arg2,arg3);        
+    switch(cmd) {
+    case COMMAND_GAMESTART:
+        setGameState("started");
+        g_turn=0;
+        break;
+    case COMMAND_PUT_SOLDIER:
+        var gx=arg0, gy=arg1;
+        var sl=new Soldier(arg0,arg1,false,g_turn);
+        send_command(conn,COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_BLUE);
+        break;
+    case COMMAND_CREATED_SOLDIER:
+        var id=arg0, gx=arg1, gy=arg2, color=arg3;
+        var sl=new Soldier(gx,gy,color==SOLDIER_RED,g_turn);
+        sl.id=id;
+        break;
+    case COMMAND_MOVED_SOLDIER:
+        var id=arg0, gx=arg1, gy=arg2;
+        var sl=getSoldierById(id);
+        if(sl) {
+            sl.gx=gx;
+            sl.gy=gy;
+        }
+        break;
+    case COMMAND_SET_FIELD_OBJECT:
+        var gx=arg0, gy=arg1, index=arg2;
+        g_fld.setObj(gx,gy,arg2);
+        updateFieldGrid(g_field_prop);
+        break;
+    default:
+        appendLog("invalid command");
+        break;
+    }
+
+
+
 }
