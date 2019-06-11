@@ -86,23 +86,26 @@ function updateGameTurn() {
     var e=document.getElementById("turn").innerHTML="Turn: "+g_turn;
 }
 function updateSoldierLeft() {
-    var col = (g_game_role=="host" ? "red":"blue");
-    document.getElementById(col+"left").innerHTML=`${g_soldier_left} left`;
+    document.getElementById("redleft").innerHTML=`${g_soldier_left_red} left`;
+    document.getElementById("blueleft").innerHTML=`${g_soldier_left_blue} left`;    
 }
-var g_soldier_left=0;
+var g_soldier_left_red=0;
+var g_soldier_left_blue=0;    
 function gameUpdate() {
-    g_turn++;
-    updateGameTurn();
-    if(g_turn%120==0) {
-        g_soldier_left++;
-        if(g_soldier_left>10) g_soldier_left=10;
-        updateSoldierLeft();
-    }
+
     // move soldier
     if(g_game_role=="host") {
+        g_turn++;
+        updateGameTurn();
+        if(g_turn%120==0) {
+            if(g_soldier_left_blue<10) g_soldier_left_blue++;
+            if(g_soldier_left_red<10) g_soldier_left_red++;
+            updateSoldierLeft();
+        }
         for(var i=0;i<g_soldiers.length;i++) {
             var s=g_soldiers[i];
-            if(s.moved_at < g_turn - 15) {
+            var speedmod = 30 + s.damage * 30;
+            if(s.moved_at < g_turn - speedmod) {
                 s.tryMove();
                 s.moved_at=g_turn;
             }
@@ -136,10 +139,10 @@ function findRoute(fx,fy,tx,ty) {
         if(g_fld.ground[i]==GROUND_WATER) g_route[i]=-1;
         if(g_fld.obj[i]) g_route[i]=-1;
     }
-    for(var i=0;i<g_soldiers.length;i++) {
-        var s=g_soldiers[i];
-        g_route[ind(s.gx,s.gy)]=-2;
-    }
+//    for(var i=0;i<g_soldiers.length;i++) {
+//        var s=g_soldiers[i];
+//        g_route[ind(s.gx,s.gy)]=-2;
+//    }
     g_route[ind(tx,ty)]=1; // starting point
     g_route[ind(fx,fy)]=0; // goal point
     for(var i=1;i<60;i++) {
@@ -213,6 +216,7 @@ class Soldier extends Prop2D {
     }
     prop2DPoll(dt) {
         this.setLoc( this.gx*20-SCRW/2+10, this.gy*20-SCRH/2+10);
+        this.setIndex(this.calcIndex());
         return true;
     }
     calcIndex() {
@@ -231,6 +235,12 @@ class Soldier extends Prop2D {
         if(cand.length>0) {
             var target = cand[irange(0,cand.length)];
             console.log("found enemy, attack!",target);
+            target.damage++;
+            send_command(g_ws, COMMAND_UPDATE_SOLDIER_DAMAGE, target.id, target.damage);
+            if(target.damage>3) {
+                send_command(g_ws, COMMAND_DELETE_SOLDIER, target.id);
+                deleteSoldier(target);
+            }
             return;            
         }
         
@@ -277,14 +287,29 @@ function isSoldier(gx,gy) {
     }
     return false;
 }
+function deleteSoldier(s) {
+    for(var i=0;i<g_soldiers.length;i++) {
+        if(g_soldiers[i]==s) {
+            s.to_clean=true;
+            g_soldiers.splice(i,1);
+            return;
+        }
+    }
+}
+//////////////
 function clickOnField(gx,gy) {
     if(!checkGridPuttable(gx,gy))return;
     if( isSoldier(gx,gy) )return;
     var is_red = (g_game_role=="host");
     console.log("clickOnField is_red:",is_red);
     if(is_red) {
-        var sl=new Soldier(gx,gy,is_red,g_turn);
-        send_command(g_ws, COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_RED);
+        if(g_soldier_left_red>0) {
+            g_soldier_left_red--;
+            updateSoldierLeft();
+            send_command(g_ws,COMMAND_UPDATE_SOLDIER_LEFT,g_soldier_left_red,g_soldier_left_blue);            
+            var sl=new Soldier(gx,gy,is_red,g_turn);
+            send_command(g_ws, COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_RED);
+        }
     } else {
         send_command(g_ws, COMMAND_PUT_SOLDIER, gx,gy);
     }
@@ -357,6 +382,9 @@ COMMAND_PUT_SOLDIER = 2;
 COMMAND_CREATED_SOLDIER = 3;
 COMMAND_MOVED_SOLDIER = 4;
 COMMAND_SET_FIELD_OBJECT = 5;
+COMMAND_DELETE_SOLDIER = 6;
+COMMAND_UPDATE_SOLDIER_DAMAGE = 7;
+COMMAND_UPDATE_SOLDIER_LEFT = 8;
 
 SOLDIER_RED = 1;
 SOLDIER_BLUE = 2;
@@ -386,8 +414,13 @@ recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
         break;
     case COMMAND_PUT_SOLDIER:
         var gx=arg0, gy=arg1;
-        var sl=new Soldier(arg0,arg1,false,g_turn);
-        send_command(conn,COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_BLUE);
+        if(g_soldier_left_blue>0) {
+            g_soldier_left_blue--;
+            updateSoldierLeft();
+            send_command(conn,COMMAND_UPDATE_SOLDIER_LEFT,g_soldier_left_red,g_soldier_left_blue);
+            var sl=new Soldier(arg0,arg1,false,g_turn);
+            send_command(conn,COMMAND_CREATED_SOLDIER,sl.id,gx,gy,SOLDIER_BLUE);
+        }
         break;
     case COMMAND_CREATED_SOLDIER:
         var id=arg0, gx=arg1, gy=arg2, color=arg3;
@@ -406,6 +439,23 @@ recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
         var gx=arg0, gy=arg1, index=arg2;
         g_fld.setObj(gx,gy,arg2);
         updateFieldGrid(g_field_prop);
+        break;
+    case COMMAND_DELETE_SOLDIER:
+        var id=arg0;
+        console.log("deletesol:",id);
+        var s=getSoldierById(id);
+        deleteSoldier(s);
+        break;
+    case COMMAND_UPDATE_SOLDIER_DAMAGE:
+        var id=arg0, damage=arg1;
+        console.log("updatedamage:",id,damage);
+        var s=getSoldierById(id);
+        if(s) s.damage=damage;
+        break;
+    case COMMAND_UPDATE_SOLDIER_LEFT:
+        g_soldier_left_red=arg0;
+        g_soldier_left_blue=arg1;
+        updateSoldierLeft();
         break;
     default:
         appendLog("invalid command");
