@@ -139,26 +139,27 @@ function findRoute(fx,fy,tx,ty) {
     }
     g_route[ind(tx,ty)]=1; // starting point
     g_route[ind(fx,fy)]=0; // goal point
-    for(var i=0;i<30;i++) {
+    for(var i=1;i<60;i++) {
         for(var y=1;y<23;y++) {
             for(var x=1;x<31;x++) {
                 if(g_route[ind(x,y)]==0) {
-                    if(g_route[ind(x+1,y)]>0) g_route[ind(x,y)]=g_route[ind(x+1,y)]+1;
-                    if(g_route[ind(x-1,y)]>0) g_route[ind(x,y)]=g_route[ind(x-1,y)]+1;
-                    if(g_route[ind(x,y+1)]>0) g_route[ind(x,y)]=g_route[ind(x,y+1)]+1;
-                    if(g_route[ind(x,y-1)]>0) g_route[ind(x,y)]=g_route[ind(x,y-1)]+1;
+                    if(g_route[ind(x+1,y)]==i) g_route[ind(x,y)]=i+1;
+                    if(g_route[ind(x-1,y)]==i) g_route[ind(x,y)]=i+1;
+                    if(g_route[ind(x,y+1)]==i) g_route[ind(x,y)]=i+1;
+                    if(g_route[ind(x,y-1)]==i) g_route[ind(x,y)]=i+1;
                 }
             }
         }
     }
-    /*
-    for(var y=0;y<24;y++) {
-        var a=[];
-        for(var x=0;x<32;x++) {
-            a.push(g_route[ind(x,y)]);
+    if(false) { // dump
+        for(var y=0;y<24;y++) {
+            var a=[];
+            for(var x=0;x<32;x++) {
+                a.push(g_route[ind(x,y)]);
+            }
+            console.log(a.join(" "));
         }
-        console.log(a.join(" "));
-        }*/
+    }
     
     var from_route = g_route[ind(fx,fy)];
     var min_route=from_route;
@@ -166,14 +167,27 @@ function findRoute(fx,fy,tx,ty) {
     var d_route = g_route[ind(fx,fy-1)];
     var l_route = g_route[ind(fx-1,fy)];
     var r_route = g_route[ind(fx+1,fy)];
-    if(u_route>0 && u_route<min_route)min_route=u_route;
-    if(d_route>0 && d_route<min_route)min_route=d_route;
-    if(l_route>0 && l_route<min_route)min_route=l_route;
-    if(r_route>0 && r_route<min_route)min_route=r_route;
-    if(min_route==u_route) return {x:0,y:1};
-    if(min_route==d_route) return {x:0,y:-1};
-    if(min_route==l_route) return {x:-1,y:0};
-    if(min_route==r_route) return {x:1,y:0};
+
+    if(range(0,1)<0.5) {
+        if(u_route>0 && u_route<min_route)min_route=u_route;
+        if(d_route>0 && d_route<min_route)min_route=d_route;        
+        if(l_route>0 && l_route<min_route)min_route=l_route;
+        if(r_route>0 && r_route<min_route)min_route=r_route;
+        if(min_route==u_route) return {x:0,y:1};
+        if(min_route==d_route) return {x:0,y:-1};
+        if(min_route==l_route) return {x:-1,y:0};
+        if(min_route==r_route) return {x:1,y:0};        
+    } else {
+        if(r_route>0 && r_route<min_route)min_route=r_route;        
+        if(l_route>0 && l_route<min_route)min_route=l_route;
+        if(d_route>0 && d_route<min_route)min_route=d_route;        
+        if(u_route>0 && u_route<min_route)min_route=u_route;
+        if(min_route==r_route) return {x:1,y:0};
+        if(min_route==l_route) return {x:-1,y:0};
+        if(min_route==d_route) return {x:0,y:-1};
+        if(min_route==u_route) return {x:0,y:1};
+    }
+
     return {x:0,y:0};
 }
 var g_soldiers=[];
