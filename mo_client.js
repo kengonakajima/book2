@@ -85,6 +85,10 @@ function setGameRole(role) {
 function updateGameTurn() {
     var e=document.getElementById("turn").innerHTML="Turn: "+g_turn;
 }
+function updateGameoverMessage(side) {
+    var col=(side==SOLDIER_RED) ? "Red" : "Blue";
+    document.getElementById("gameover").innerHTML=`FINISH! ${col} team won`;
+}
 function updateSoldierLeft() {
     document.getElementById("redleft").innerHTML=`${g_soldier_left_red} left`;
     document.getElementById("blueleft").innerHTML=`${g_soldier_left_blue} left`;    
@@ -101,6 +105,7 @@ function gameUpdate() {
             if(g_soldier_left_blue<10) g_soldier_left_blue++;
             if(g_soldier_left_red<10) g_soldier_left_red++;
             updateSoldierLeft();
+            send_command(g_ws,COMMAND_UPDATE_SOLDIER_LEFT,g_soldier_left_red,g_soldier_left_blue);
         }
         for(var i=0;i<g_soldiers.length;i++) {
             var s=g_soldiers[i];
@@ -261,11 +266,15 @@ class Soldier extends Prop2D {
             g_fld.setObj(nx,ny,OBJ_BLUE_HOUSE_BROKEN);
             updateFieldGrid(g_field_prop);
             send_command(g_ws,COMMAND_SET_FIELD_OBJECT,nx,ny,OBJ_BLUE_HOUSE_BROKEN);
+            send_command(g_ws,COMMAND_GAME_FINISHED,SOLDIER_RED);
+            updateGameoverMessage(SOLDIER_RED);                
             return;
         } else if(!this.red && cell.obj==OBJ_RED_HOUSE) {
             g_fld.setObj(nx,ny,OBJ_RED_HOUSE_BROKEN);
             updateFieldGrid(g_field_prop);
-            send_command(g_ws,COMMAND_SET_FIELD_OBJECT,nx,ny,OBJ_RED_HOUSE_BROKEN);            
+            send_command(g_ws,COMMAND_SET_FIELD_OBJECT,nx,ny,OBJ_RED_HOUSE_BROKEN);
+            send_command(g_ws,COMMAND_GAME_FINISHED,SOLDIER_BLUE);
+            updateGameoverMessage(SOLDIER_BLUE);                            
             return;
         }
         this.gx=nx;
@@ -377,7 +386,7 @@ function joinRoomPressed() {
 
 ///////////
 
-COMMAND_GAMESTART = 1;
+COMMAND_GAME_START = 1;
 COMMAND_PUT_SOLDIER = 2;
 COMMAND_CREATED_SOLDIER = 3;
 COMMAND_MOVED_SOLDIER = 4;
@@ -385,6 +394,7 @@ COMMAND_SET_FIELD_OBJECT = 5;
 COMMAND_DELETE_SOLDIER = 6;
 COMMAND_UPDATE_SOLDIER_DAMAGE = 7;
 COMMAND_UPDATE_SOLDIER_LEFT = 8;
+COMMAND_GAME_FINISHED = 9;
 
 SOLDIER_RED = 1;
 SOLDIER_BLUE = 2;
@@ -401,14 +411,14 @@ recv_joinRoomResult = function(conn,result,roomid) {
 }
 recv_joinNotify = function(conn) {
     appendLog("recv_joinNotify");
-    send_command(conn, COMMAND_GAMESTART);
+    send_command(conn, COMMAND_GAME_START);
     setGameState("started");
     g_turn=0;
 }
 recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
     appendLog("recv_command",cmd,arg0,arg1,arg2,arg3);        
     switch(cmd) {
-    case COMMAND_GAMESTART:
+    case COMMAND_GAME_START:
         setGameState("started");
         g_turn=0;
         break;
@@ -456,6 +466,10 @@ recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
         g_soldier_left_red=arg0;
         g_soldier_left_blue=arg1;
         updateSoldierLeft();
+        break;
+    case COMMAND_GAME_FINISHED:
+        var side=arg0;
+        updateGameoverMessage(side);
         break;
     default:
         appendLog("invalid command");
