@@ -220,6 +220,21 @@ class Soldier extends Prop2D {
         return base + this.damage*2;
     }
     tryMove() {
+        // first search enemy 3x3
+        var cand=[];
+        for(var i=0;i<g_soldiers.length;i++) {
+            var s=g_soldiers[i];
+            if(s.gx>=this.gx-1 && s.gx<=this.gx+1 && s.gy>=this.gy-1 && s.gy<=this.gy+1 && s.red != this.red ) {
+                cand.push(s);
+            }
+        }
+        if(cand.length>0) {
+            var target = cand[irange(0,cand.length)];
+            console.log("found enemy, attack!",target);
+            return;            
+        }
+        
+        // then move
         var goalx,goaly=11;
         if(this.red) {
             goalx=31-2;
