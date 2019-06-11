@@ -59,7 +59,7 @@ function gameInit() {
     }
     g_fld.generate();
     
-    setupFieldGrid();
+    g_field_prop=setupFieldGrid();
 
     setupGridCursor();
     
@@ -101,7 +101,7 @@ function gameUpdate() {
     // move soldier
     for(var i=0;i<g_soldiers.length;i++) {
         var s=g_soldiers[i];
-        if(s.moved_at < g_turn - 60) {
+        if(s.moved_at < g_turn - 15) {
             s.tryMove();
             s.moved_at=g_turn;
         }
@@ -130,6 +130,7 @@ function ind(x,y) {
 var g_route=new Int32Array(24*32); // 0:OK -1:obj, -2:soldier
 function findRoute(fx,fy,tx,ty) {
     for(var i=0;i<24*32;i++) {
+        g_route[i]=0;
         if(g_fld.ground[i]==GROUND_WATER) g_route[i]=-1;
         if(g_fld.obj[i]) g_route[i]=-1;
     }
@@ -226,6 +227,17 @@ class Soldier extends Prop2D {
         var nx=this.gx+to_move.x;
         var ny=this.gy+to_move.y;
         if(isSoldier(nx,ny))return;
+        var cell=g_fld.getCell(nx,ny);
+        if(!cell) console.log("NULL:",nx,ny);
+        if(this.red && cell.obj==OBJ_BLUE_HOUSE) {
+            g_fld.setObj(nx,ny,OBJ_BLUE_HOUSE_BROKEN);
+            updateFieldGrid(g_field_prop);
+            return;
+        } else if(!this.red && cell.obj==OBJ_RED_HOUSE) {
+            g_fld.setObj(nx,ny,OBJ_RED_HOUSE_BROKEN);
+            updateFieldGrid(g_field_prop);
+            return;
+        }
         this.gx=nx;
         this.gy=ny;
     }
@@ -240,9 +252,12 @@ function isSoldier(gx,gy) {
     return false;
 }
 function clickOnField(gx,gy) {
-    if(!checkGridPuttable(gx,gy))return;
-    if( isSoldier(gx,gy) )return;
-    var sl=new Soldier(gx,gy,g_game_role=="host",g_turn);
+//    if(!checkGridPuttable(gx,gy))return;
+    //    if( isSoldier(gx,gy) )return;
+    var is_red = (g_game_role=="host");
+    if(gx<14)is_red=true; else is_red=false;
+    console.log("clickOnField is_red:",is_red);
+    if(gx>0 && gy>0 && gx<30 && gy<23)    var sl=new Soldier(gx,gy,is_red,g_turn);
     
     
 }

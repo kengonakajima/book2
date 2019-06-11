@@ -50,12 +50,20 @@ function setupFieldGrid() {
     p.setScl(20,20);
     p.setLoc(-SCRW/2,-SCRH/2);
     p.setIndex(-1);
-    var groundgrid = new Grid(g_fld.width,g_fld.height);
-    groundgrid.setDeck(g_base_deck);
-    p.addGrid(groundgrid);
-    var objgrid = new Grid(g_fld.width,g_fld.height);
-    objgrid.setDeck(g_base_deck);
-    p.addGrid(objgrid);
+    p.groundgrid = new Grid(g_fld.width,g_fld.height);
+    p.groundgrid.setDeck(g_base_deck);
+    p.addGrid(p.groundgrid);
+    p.objgrid = new Grid(g_fld.width,g_fld.height);
+    p.objgrid.setDeck(g_base_deck);
+    p.addGrid(p.objgrid);
+    updateFieldGrid(p);
+    p.prop2DPoll = function(dt) {
+        return true;
+    }
+    g_main_layer.insertProp(p);
+    return p;
+}
+function updateFieldGrid(p) {
     for(var x=0;x<g_fld.width;x++){
         for(var y=0;y<g_fld.height;y++){
             var cell=g_fld.getCell(x,y);
@@ -69,16 +77,14 @@ function setupFieldGrid() {
             case OBJ_TREE: obj_ind=2; break;
             case OBJ_RED_HOUSE: obj_ind=70; break;
             case OBJ_BLUE_HOUSE: obj_ind=71; break;
-                
+            case OBJ_RED_HOUSE_BROKEN: obj_ind=70+32; break;
+            case OBJ_BLUE_HOUSE_BROKEN: obj_ind=71+32; break;                    
             }
-            groundgrid.set(x,y,gr_ind);
-            objgrid.set(x,y,obj_ind);
+            p.groundgrid.set(x,y,gr_ind);
+            p.objgrid.set(x,y,obj_ind);
             
 //            console.log("cell:",x,y,cell);
         }
     }
-    p.prop2DPoll = function(dt) {
-        return true;
-    }
-    g_main_layer.insertProp(p);
 }
+

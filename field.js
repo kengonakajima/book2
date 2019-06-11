@@ -2,6 +2,8 @@ OBJ_NONE=0;
 OBJ_TREE=1;
 OBJ_RED_HOUSE=2;
 OBJ_BLUE_HOUSE=3;
+OBJ_RED_HOUSE_BROKEN=4;
+OBJ_BLUE_HOUSE_BROKEN=5;
 
 GROUND_GRASS=1;
 GROUND_WATER=2;
@@ -24,6 +26,11 @@ class Field {
         if(x<0||y<0||x>=this.width||y>=this.height) return null;
         var ind=x+y*this.width;        
         return { ground: this.ground[ind], obj: this.obj[ind] };
+    }
+    setObj(x,y,o) {
+        if(x<0||y<0||x>=this.width||y>=this.height) return;
+        var ind=x+y*this.width;
+        this.obj[ind]=o;
     }
     dumpField() {
         var ind=0;
