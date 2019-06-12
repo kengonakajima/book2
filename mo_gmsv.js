@@ -31,6 +31,10 @@ ws_server.on('connection', function(conn) {
     });
     conn.on("close", function(e) {
         console.log("close:");
+        if(conn.room) {
+            send_leaveRoomNotify(conn.room.conn0);
+            send_leaveRoomNotify(conn.room.conn1);            
+        }
         var conn_ind=g_conns.indexOf(conn);
         if(conn_ind>=0) g_conns.splice(conn_ind,1);
     });

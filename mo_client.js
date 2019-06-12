@@ -1,3 +1,4 @@
+var g_field_prop;
 
 var wsaddr = document.location.host.split(":")[0];
 var g_ws=new WebSocket( "ws://"+wsaddr+":22222", ["game-protocol"]);
@@ -370,8 +371,16 @@ function animate() {
     Moyai.poll(dt/1000.0);
     Moyai.render();
 
+    var col;
     if(g_game_state=="started" ) {
         gameUpdate();
+        col=1;
+    } else {
+        col=0.4;
+    }
+    if(g_field_prop) {
+        g_field_prop.groundgrid.fillColor([col,col,col,1]);
+        g_field_prop.objgrid.fillColor([col,col,col,1]);                
     }
 }
 
@@ -405,6 +414,7 @@ function leavePressed() {
     send_leaveRoom(g_ws);
     setGameState("stopped");
     clearGameoverMessage();
+    clearSoldiers();
 }
 
 ///////////
@@ -441,7 +451,8 @@ recv_joinNotify = function(conn) {
 recv_leaveRoomNotify = function(conn) {
     appendLog("recv_leaveRoomNotify");    
     setGameState("stopped");
-    clearGameoverMessage();    
+    clearGameoverMessage();
+    clearSoldiers();    
 }
 recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
     appendLog("recv_command",cmd,arg0,arg1,arg2,arg3);        
