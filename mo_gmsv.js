@@ -94,3 +94,22 @@ recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
         console.log("cant find destination");
     }
 }
+recv_leaveRoom = function(conn) {
+    console.log("recv_leaveRoom");
+    if(!conn.room) {
+        console.log("no room");
+        return;
+    }
+    if(conn==conn.room.conn0) {
+        send_leaveRoomNotify(conn.room.conn1);
+        for(var i=0;i<g_rooms.length;i++) {
+            if(g_rooms[i].id==conn.room.id) {
+                console.log("room found:",conn.room.id);
+                g_rooms.splice(i,1);
+                break;
+            }
+        }
+    } else {
+        send_leaveRoomNotify(conn.room.conn0);        
+    }
+}

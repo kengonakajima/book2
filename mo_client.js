@@ -85,16 +85,20 @@ function setGameRole(role) {
 function updateGameTurn() {
     var e=document.getElementById("turn").innerHTML="Turn: "+g_turn;
 }
+function clearGameoverMessage() {
+    document.getElementById("gameover").innerHTML="";
+}
 function updateGameoverMessage(side) {
     var col=(side==SOLDIER_RED) ? "Red" : "Blue";
-    document.getElementById("gameover").innerHTML=`FINISH! ${col} team won`;
+    document.getElementById("gameover").innerHTML=`FINISH! ${col} team won<BR><input type='submit' onclick='leavePressed();' value='Leave room' style='font-size:30px;'>`;
 }
 function updateSoldierLeft() {
     document.getElementById("redleft").innerHTML=`${g_soldier_left_red} left`;
     document.getElementById("blueleft").innerHTML=`${g_soldier_left_blue} left`;    
 }
 var g_soldier_left_red=0;
-var g_soldier_left_blue=0;    
+var g_soldier_left_blue=0;
+
 function gameUpdate() {
 
     // move soldier
@@ -305,6 +309,12 @@ function deleteSoldier(s) {
         }
     }
 }
+function clearSoldiers() {
+    for(var i=0;i<g_soldiers.length;i++) {
+        g_soldiers[i].to_clean=true;
+    }
+    g_soldiers=[];
+}
 //////////////
 function clickOnField(gx,gy) {
     if(!checkGridPuttable(gx,gy))return;
@@ -371,6 +381,15 @@ var g_fld=new Field(32,24);
 
 gameInit();
 
+
+function resetGame() {
+    g_turn=0;
+    g_soldier_left_red=10;
+    g_soldier_left_blue=10;
+    updateSoldierLeft();
+    clearSoldiers();
+}
+
 ////////////
 function createRoomPressed() {
     send_createRoom(g_ws);
@@ -382,7 +401,11 @@ function joinRoomPressed() {
     setGameState("waiting");
     setGameRole("guest");
 }
-
+function leavePressed() {
+    send_leaveRoom(g_ws);
+    setGameState("stopped");
+    clearGameoverMessage();
+}
 
 ///////////
 
@@ -413,14 +436,19 @@ recv_joinNotify = function(conn) {
     appendLog("recv_joinNotify");
     send_command(conn, COMMAND_GAME_START);
     setGameState("started");
-    g_turn=0;
+    resetGame();
+}
+recv_leaveRoomNotify = function(conn) {
+    appendLog("recv_leaveRoomNotify");    
+    setGameState("stopped");
+    clearGameoverMessage();    
 }
 recv_command = function(conn,cmd,arg0,arg1,arg2,arg3) {
     appendLog("recv_command",cmd,arg0,arg1,arg2,arg3);        
     switch(cmd) {
     case COMMAND_GAME_START:
         setGameState("started");
-        g_turn=0;
+        resetGame();
         break;
     case COMMAND_PUT_SOLDIER:
         var gx=arg0, gy=arg1;
