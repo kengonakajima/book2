@@ -4,7 +4,7 @@
 #include <string.h> // strerror
 #include <unistd.h> // read/write
 
-void print_tcp_stat(int fd);   
+#include "util.h"
 
 int main() {
     int svfd=socket(AF_INET,SOCK_STREAM,0);
@@ -25,12 +25,17 @@ int main() {
         int peerfd=accept(svfd, (struct sockaddr *)&peer_addr, &peer_addr_len);
         if(peerfd<0) { fprintf(stderr,"accept error:%s\n",strerror(errno)); return 1;}
         fprintf(stderr, "accepted\n");
+        double last_recv_at=0;
         while(1) {
             char buf[100];
-            ret=read(peerfd,buf,100);
+            ret=read(peerfd,buf,sizeof(buf));
             if(ret>0) {
-                print_tcp_stat(peerfd);
-                ret=write(peerfd,buf,ret);
+                buf[ret]='\0';
+                //ret=write(peerfd,buf,ret);
+                double t=now();
+                double dt=t-last_recv_at;
+                fprintf(stderr,"dt: %f\n",dt);
+                last_recv_at=t;
             } else {
                 break;
             }
