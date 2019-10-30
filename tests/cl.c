@@ -19,7 +19,8 @@ int main(int argc, char **argv) {
     ret=connect(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
     if(ret<0) { fprintf(stderr,"connect error:%s\n",strerror(errno)); return 1; }
 
-    int n=20;
+    double interval=0.2;
+    int n=100;
     int cnt=0;
     double last_sent_at=0;
     while(1) {
@@ -30,7 +31,7 @@ int main(int argc, char **argv) {
         struct timeval timeout={0,0};
         if(select(fd+1,0,&wfds,0,&timeout)>0) {
             if(FD_ISSET(fd,&wfds)) {
-                if(now()>last_sent_at+1.0) {
+                if(now()>last_sent_at+interval) {
                     fprintf(stderr,"sending %d\n",cnt);
                     last_sent_at=now();
                     cnt++;
