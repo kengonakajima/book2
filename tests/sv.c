@@ -20,9 +20,11 @@ void print_tcp_stat(int fd) {
     memset(&info,0,sizeof(info));
     int length = sizeof(info);
     getsockopt(fd, IPPROTO_TCP, TCP_INFO, (void *)&info, (socklen_t *)&length);
-	fprintf(stderr,"TCP %u %u %u %u %u %u %u %u %u %u %u %u %u\n",
-			info.tcpi_last_data_sent,
-			info.tcpi_last_data_recv,
+	fprintf(stderr,"TCP %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",
+            info.tcpi_snd_mss,
+            info.tcpi_rcv_mss,
+            info.tcpi_snd_wscale,
+            info.tcpi_rcv_wscale,            
 			info.tcpi_snd_cwnd,
 			info.tcpi_snd_ssthresh,
 			info.tcpi_rcv_ssthresh,
