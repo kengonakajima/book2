@@ -34,7 +34,14 @@ int main() {
                 //ret=write(peerfd,buf,ret);
                 double t=now();
                 double dt=t-last_recv_at;
-                fprintf(stderr,"dt: %f\n",dt);
+                int l=(int)(dt*100);
+                char bar[100];
+                int i;
+                for(i=0;i<sizeof(bar);i++) {
+                    if(i<l)bar[i]='*'; else bar[i]=' ';
+                }
+                bar[sizeof(bar)-1]='\0';
+                fprintf(stderr,"dt: %f %s\n",dt,bar);
                 last_recv_at=t;
             } else {
                 break;
