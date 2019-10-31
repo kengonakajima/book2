@@ -6,6 +6,13 @@
 #include <netinet/tcp.h>
 #include <sys/select.h> // select
 #include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
+// mac
+#if !defined(SOL_TCP) && defined(IPPROTO_TCP)
+#define SOL_TCP IPPROTO_TCP
+#endif
 
 #include "util.h"
 
@@ -18,6 +25,14 @@ int main(int argc, char **argv) {
     if(ret<0) { fprintf(stderr,"inet_pton error:%s\n",strerror(errno)); return 1; }
     ret=connect(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
     if(ret<0) { fprintf(stderr,"connect error:%s\n",strerror(errno)); return 1; }
+    if(argv[2]) {
+        int flag = atoi(argv[2]);
+        if(flag) {
+            fprintf(stderr,"use nodelay\n");
+            ret=setsockopt(fd, SOL_TCP, TCP_NODELAY, (void *)&flag, sizeof(flag));
+            if(ret<0){ fprintf(stderr, "setsocketopt(), TCP_NODELAY failed\n"); return 1; }
+        }
+    }
 
     double interval=0.2;
     int n=100;
