@@ -10,13 +10,13 @@
 
 2. ネットワークプログラミング再訪
 
-   Vol.1では、ソケットAPIをざっと。TCPだけを取り出して、socket,connect,bind,listen,accept,read,write,select
+Vol.1では、ソケットAPIをざっと。TCPだけを取り出して、socket,connect,bind,listen,accept,read,write,select
 など基本的なのだけ解説していた。また、プログラミング言語について簡単に紹介しただけだった。
 IPv6とUDPの例がないのと、TCPとUDPの使い分けについて詳しい説明がなかった。
 
 2.0. モバイル時代におけるトランスポート層の課題
 
-   TCPの限界が来ている問題と、それをUDPで解決する方法について、
+TCPの限界が来ている問題と、それをUDPで解決する方法について、
 実際にツールを使って測定しながら、詳しく述べる。
 
 2.1. TCPプログラミング
